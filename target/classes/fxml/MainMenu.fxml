@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.Pane?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="200.0" minWidth="300.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.162" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.ASVidBuild.PanelController.MainMenuController">
+   <children>
+      <Button fx:id="explorerButton" layoutX="374.0" layoutY="117.0" mnemonicParsing="false" onAction="#explorerButtonClick" text="Explorer" />
+      <Button fx:id="databaseButton" layoutX="370.0" layoutY="204.0" mnemonicParsing="false" onAction="#databaseButtonClick" text="Database" />
+      <Button fx:id="exitButton" layoutX="380.0" layoutY="409.0" mnemonicParsing="false" onAction="#exitButtonClick" text="Exit" />
+      <Button fx:id="optionsButton" layoutX="376.0" layoutY="306.0" mnemonicParsing="false" onAction="#optionsButtonClick" text="Options" />
+   </children>
+</Pane>
