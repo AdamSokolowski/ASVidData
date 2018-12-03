@@ -1,16 +1,24 @@
 package pl.ASVidBuild;
 
 import javafx.application.Application;
+
+/**
+ * 
+ * @author Adam Soko³owski
+ *
+ */
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import pl.ASVidBuild.database.DbRepository;
 
 public class Main extends Application{
-
+	
 	public static void main(String[] args) {
+		DbRepository.initDatabases();
 		launch(args);
-
 	}
 
 	@Override

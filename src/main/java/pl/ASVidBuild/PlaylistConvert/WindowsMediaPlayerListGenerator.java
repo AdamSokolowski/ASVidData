@@ -3,6 +3,12 @@ package pl.ASVidBuild.PlaylistConvert;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
+/**
+ * 
+ * @author Adam Soko³owski
+ *
+ */
+
 public class WindowsMediaPlayerListGenerator {
 	public static void create(String[] listItems, String listTitle, String filePath) {
 		PrintWriter out;

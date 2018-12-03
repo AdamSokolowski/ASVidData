@@ -4,6 +4,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
+/**
+ * 
+ * @author Adam Soko³owski
+ *
+ */
+
 public class DatabaseScreenController {
 
 	@FXML

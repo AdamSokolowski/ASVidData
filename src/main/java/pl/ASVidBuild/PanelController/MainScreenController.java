@@ -7,6 +7,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
+/**
+ * 
+ * @author Adam Soko³owski
+ *
+ */
+
 public class MainScreenController {
 	
 	@FXML

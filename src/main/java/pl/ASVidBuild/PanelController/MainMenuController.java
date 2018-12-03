@@ -2,11 +2,18 @@ package pl.ASVidBuild.PanelController;
 
 import java.io.IOException;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
+
+/**
+ * 
+ * @author Adam Soko³owski
+ *
+ */
 
 public class MainMenuController {
 
@@ -62,7 +69,8 @@ public class MainMenuController {
 
 	@FXML
 	void exitButtonClick(ActionEvent event) {
-
+		Platform.exit();
+		System.exit(0);
 	}
 
 }
