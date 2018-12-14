@@ -5,31 +5,39 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
+import javafx.scene.control.SplitPane;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import pl.ASVidBuild.SettingsData;
 import pl.ASVidBuild.PanelController.MainScreenController;
 import pl.ASVidBuild.PlaylistConvert.*;
 import pl.ASVidBuild.database.DbRepository;
+import pl.ASVidBuild.database.dao.MediaFileDao;
 
 /**
  * 
@@ -51,6 +59,9 @@ public class ExplorerScreenController {
 
 	@FXML
 	private Button openListMPClassic;
+	
+    @FXML
+    private Button buttonClearList;
 
 	@FXML
 	private MediaView mainMediaView;
@@ -78,6 +89,9 @@ public class ExplorerScreenController {
 	
     @FXML
     private Button mainMediaViewFullScreen;
+    
+    @FXML
+    private Button TagWindowButton;
 
 	@FXML
 	private Slider mainMediaViewPlayProgress;
@@ -126,6 +140,11 @@ public class ExplorerScreenController {
 		mediaPlayerListGenAndPlay("Windows Media Player");
 
 	}
+	
+    @FXML
+    void buttonClearListClick(ActionEvent event) {
+    	vidPlayList.getItems().clear();
+    }
 
 	public void mediaPlayerListGenAndPlay(String mediaPlayerType) {
 		// method converts list of videos in vidPlaylist to list compatible with given
@@ -167,17 +186,17 @@ public class ExplorerScreenController {
 
 	}
 
-	public void launchExternalProg(String progPath, String filePath) {
-		Process process;
+	public Process launchExternalProg(String progPath, String filePath) {
+		Process process = null;
 
 		try {
 			String command = "\"" + progPath + "\" \"" + filePath + "\"";
 			System.out.println("Launched command - " + command);
 			process = Runtime.getRuntime().exec(command);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return process;
 	}
 
 	@FXML
@@ -190,14 +209,18 @@ public class ExplorerScreenController {
 		fileChooser.getExtensionFilters().addAll(filterMp4, filterAvi, filterAll);
 		File file = fileChooser.showOpenDialog(null);
 
+		addFileToVidPlayListAndDatabase(file);
+
+	}
+
+	private void addFileToVidPlayListAndDatabase(File file) {
 		if (file != null) {
 			// String filePath = file.toURI().toString();
 			String filePath = file.getAbsolutePath();
 			vidPlayList.getItems().add(filePath);
 			String[] filePathList= {filePath};
-			DbRepository.addFilesToDb(filePathList);
+			MediaFileDao.addMediaFilesToDb(filePathList);
 		}
-
 	}
 
 	@FXML
@@ -333,5 +356,41 @@ public class ExplorerScreenController {
 		mediaPlayer.seek(Duration.seconds(mainMediaViewPlayProgress.getValue()));
 		mediaPlayer.play();
 	}
+	
+	@FXML
+	void TagWindowButtonClick(ActionEvent event) {
+		Scene scene = null;
+		FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/fxml/TagScreen.fxml"));
+		SplitPane splitPane = null;
+		try {
+			splitPane = loader.load();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		scene = new Scene(splitPane);
+		Stage tagsStage = new Stage();
+		tagsStage.setScene(scene);
+		tagsStage.setTitle("Tags Palette");
+		tagsStage.show();
+	}
+	
+	@FXML
+    void vidPlayListOnDragOver(DragEvent event) {
+		if(event.getDragboard().hasFiles()) {
+			event.acceptTransferModes(TransferMode.ANY);
+		}
+    }
+	
+    @FXML
+    void vidPlayListOnDragDropped(DragEvent event) {
+    	List<File> files = event.getDragboard().getFiles();
+    
+    	for (int i=0; i<files.size(); i++) {
+    		addFileToVidPlayListAndDatabase(files.get(i));
+    	}
+    }
+
+
 
 }

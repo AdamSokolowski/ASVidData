@@ -2,27 +2,18 @@ package pl.ASVidBuild.database;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DbRepository {
-	public static final String DB_URL = "jdbc:mysql://localhost:3306/asviddata?useSSL=false&useUnicode=true&characterEncoding=utf8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT";
-	public static final String DB_USER = "root";
-	public static final String DB_PASS = "coderslab";
 
 	private static Connection conn = null;
 
 	public static void initDatabases() {
+		try {
 
-		try {
 			conn = DbUtil.getConn();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
 
 			if (tableExists("MediaFile", conn)) {
 				System.out.println("Table 'MediaFile' found in database");
@@ -30,9 +21,9 @@ public class DbRepository {
 				String sqlTabCreateMediaFile = mySQLQueryGeneratorCreateTable("MediaFile",
 						MySQLSwitches.tabField("filePath", MySQLJavaFieldTypes.StringAsVarchar(400), true, true) + ", "
 								+ MySQLSwitches.tabField("picturePath", MySQLJavaFieldTypes.StringAsVarchar(400), false,
-										false)
+										false,"''")
 								+ ", "
-								+ MySQLSwitches.tabField("fileRating", MySQLJavaFieldTypes.intAsTINYINT, false, false),
+								+ MySQLSwitches.tabField("fileRating", MySQLJavaFieldTypes.byteAsTINYINT, false, false, "0"),
 						"");
 				Statement statement = conn.createStatement();
 				statement.execute(sqlTabCreateMediaFile);
@@ -81,29 +72,25 @@ public class DbRepository {
 		return false;
 	}
 
-	public static boolean mediaFileExistsInDb(String filePath, Connection databaseConnection) throws SQLException {
+	/*public static boolean mediaFileExistsInDb(String filePath, Connection databaseConnection) throws SQLException {
 		Statement statement = databaseConnection.createStatement();
-		ResultSet fileFound = statement.executeQuery("SELECT * FROM MediaFile WHERE filePath = \"" + filePath + "\"");
+		ResultSet fileFound = statement.executeQuery("SELECT * FROM MediaFile WHERE filePath = \"" + filePath.replace("\\", "\\\\") + "\"");
 		if (fileFound.next()) {
 			return true;
 		}
 		return false;
-	}
+	}*/
 
-	public static void addFilesToDb(String[] filePathList) {
+	/*public static void addMediaFilesToDb(String[] filePathList) {
+
 
 		try {
 			conn = DbUtil.getConn();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
 			for (int i = 0; i < filePathList.length; i++) {
 
 				if (!mediaFileExistsInDb(filePathList[i], conn)) {
 					String sqlAddFileToDb = mySQLQueryGeneratorAddRecord("MediaFile", "filePath",
-							"\"" + filePathList[i] + "\"");
+							"\"" + filePathList[i].replace("\\", "\\\\") + "\"");
 					Statement statement = conn.createStatement();
 					statement.executeUpdate(sqlAddFileToDb);
 					System.out.println(sqlAddFileToDb);
@@ -121,17 +108,13 @@ public class DbRepository {
 				}
 			}
 		}
-	}
+	}*/
 
-	public static void addTagsToDb(String[] tagsList) {
+/*	public static void addTagsToDb(String[] tagsList) {
+
 
 		try {
 			conn = DbUtil.getConn();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
 			for (int i = 0; i < tagsList.length; i++) {
 				String sqlAddTagToDb = mySQLQueryGeneratorAddRecord("Tag", "\"tagName\"", tagsList[i]);
 				Statement statement = conn.createStatement();
@@ -149,7 +132,7 @@ public class DbRepository {
 				}
 			}
 		}
-	}
+	}*/
 
 	public static String mySQLQueryGeneratorCreateTable(String tableName, String tabFields, String relation) {
 		return "CREATE TABLE " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, " + tabFields + relation + ")";
@@ -157,5 +140,16 @@ public class DbRepository {
 
 	public static String mySQLQueryGeneratorAddRecord(String tableName, String tabFields, String tabValues) {
 		return "INSERT INTO " + tableName + "(" + tabFields + ") VALUES(" + tabValues + ")";
+	}
+	
+	public static String mySQLQueryGeneratorUpdateRecordValues(String tableName, String tabFields, String tabValues, String conditionArguments) {
+		String[] tabFieldsArray = tabFields.split(", ");
+		String[] tabValuesArray = tabValues.split(", ");
+		String sql = "UPDATE "+ tableName + " SET ";
+		for(int i = 0; i<tabFieldsArray.length-1; i++) {
+			sql += tabFieldsArray[i]+"="+tabValuesArray[i]+", ";
+		}
+		sql += tabFieldsArray[tabFieldsArray.length-1]+"="+tabValuesArray[tabFieldsArray.length-1]+" WHERE "+  conditionArguments;
+		return sql;
 	}
 }

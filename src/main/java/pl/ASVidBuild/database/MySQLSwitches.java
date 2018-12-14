@@ -33,4 +33,9 @@ public class MySQLSwitches {
 		
 		return result;
 	}
+	
+	public static String tabField(String fieldName, String javaFieldType, boolean unique, boolean valueRequired, String defaultValue) {
+		return tabField( fieldName, javaFieldType, unique, valueRequired)+" DEFAULT "+ defaultValue;
+	}
+	
 }

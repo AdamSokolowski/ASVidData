@@ -12,12 +12,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.media.MediaView?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="800.0" minWidth="1200.0" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.162" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.ASVidBuild.PanelController.ExplorerScreenController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="800.0" minWidth="1200.0" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.ASVidBuild.PanelController.ExplorerScreenController">
    <children>
       <Button fx:id="menuButton" layoutX="577.0" layoutY="761.0" mnemonicParsing="false" onAction="#menuButtonClick" text="Menu" />
       <BorderPane layoutX="686.0" layoutY="84.0" prefHeight="653.0" prefWidth="490.0">
          <center>
-            <ListView fx:id="vidPlayList" onMouseClicked="#vidPlayListClick" prefHeight="653.0" prefWidth="490.0" BorderPane.alignment="CENTER">
+            <ListView fx:id="vidPlayList" onDragDropped="#vidPlayListOnDragDropped" onDragOver="#vidPlayListOnDragOver" onMouseClicked="#vidPlayListClick" prefHeight="653.0" prefWidth="490.0" BorderPane.alignment="CENTER">
                <contextMenu>
                   <ContextMenu fx:id="vidPlaylistMenu">
                     <items>
@@ -37,9 +37,14 @@
                         <Insets />
                      </HBox.margin>
                   </Button>
+                  <Button fx:id="buttonClearList" mnemonicParsing="false" onAction="#buttonClearListClick" text="Clear List">
+                     <HBox.margin>
+                        <Insets left="70.0" />
+                     </HBox.margin>
+                  </Button>
                   <Button fx:id="openListMPClassic" mnemonicParsing="false" onAction="#openListMPClassicClick" text="Open List in MPClassic">
                      <HBox.margin>
-                        <Insets left="215.0" />
+                        <Insets left="80.0" />
                      </HBox.margin>
                   </Button>
                </children>
@@ -99,6 +104,10 @@
                         <Insets left="5.0" />
                      </padding>
                   </HBox>
+                  <Button fx:id="TagsWindowButton" mnemonicParsing="false" onAction="#TagWindowButtonClick" text="Tags">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin></Button>
                </children>
             </VBox>
          </bottom>

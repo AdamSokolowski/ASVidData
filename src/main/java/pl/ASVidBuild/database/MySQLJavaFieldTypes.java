@@ -2,7 +2,7 @@ package pl.ASVidBuild.database;
 
 public class MySQLJavaFieldTypes {
 	public static final String intAsINT = "INT";
-	public static final String intAsTINYINT = "TINYINT";
+	public static final String byteAsTINYINT = "TINYINT";
 	public static final String booleanASBOOLEAN = "BOOLEAN";
 	
 	

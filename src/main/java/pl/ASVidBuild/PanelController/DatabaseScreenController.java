@@ -1,5 +1,7 @@
 package pl.ASVidBuild.PanelController;
 
+
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,8 +14,9 @@ import javafx.scene.control.Button;
 
 public class DatabaseScreenController {
 
-	@FXML
-	private Button menuButton;
+    @FXML
+    private Button menuButton;
+
 	
 	private MainScreenController mainScreenController;
 	
