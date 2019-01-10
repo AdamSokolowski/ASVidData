@@ -95,7 +95,7 @@ public class SettingsData {
 	}
 	
 	public void loadFromFile() {
-File file = new File(workFolder + "\\settings.ini");
+		File file = new File(workFolder + "\\settings.ini");
 		
 		if (file.exists()) {
 			Scanner scan;

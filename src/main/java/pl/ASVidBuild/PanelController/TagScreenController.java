@@ -1,18 +1,28 @@
 package pl.ASVidBuild.PanelController;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
+import javafx.stage.Modality;
+import pl.ASVidBuild.UI.Point;
+import pl.ASVidBuild.UI.UIHelper;
 import pl.ASVidBuild.database.dao.TagDao;
 import pl.ASVidBuild.database.pojo.Tag;
 
@@ -27,8 +37,12 @@ public class TagScreenController {
     @FXML
     private Pane tagsPane;
     
+    @FXML
+    private Button addNewTagButton;
     
-    private int paletteTagsCount = 0;
+
+
+	private int paletteTagsCount = 0;
     
     private static final int TAG_HEIGHT = 150;
     private static final int TAG_WIDTH = 200;
@@ -36,41 +50,53 @@ public class TagScreenController {
     private static final int TAGS_MAX_COL_COUNT = 3;
     
     
-    
 	@FXML
 	public void initialize() {
 		List<Tag> allTags = TagDao.getAllTags();
 		for (int i=0; i<allTags.size();i++) {
-			addTagToTagsPalette(TagDao.getAllTags().get(i));
+			UIHelper.addTagToPane(TagDao.getAllTags().get(i), paletteTagsCount, tagsPane, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, TAGS_MAX_COL_COUNT);
+			updateNewTagButtonPosition();
+			paletteTagsCount++;
 		}
-		tagsSplitPane.setPrefWidth(GAP_BTWEEN_TAGS+TAGS_MAX_COL_COUNT*(TAG_WIDTH+GAP_BTWEEN_TAGS)+15);
+		tagsSplitPane.setPrefWidth(tagsPane.getPrefWidth()+15);
 	}
 	
-	private void addTagToTagsPalette(Tag tag) {
-		if(tag.getPicturePath().equals("")) {
-			Button button = new Button(tag.getTagName());
-			tagsPane.getChildren().add(button);
-			button.setLayoutX(GAP_BTWEEN_TAGS+(paletteTagsCount % TAGS_MAX_COL_COUNT)*(TAG_WIDTH+GAP_BTWEEN_TAGS));
-			button.setLayoutY(GAP_BTWEEN_TAGS+(paletteTagsCount / TAGS_MAX_COL_COUNT)*(TAG_HEIGHT+GAP_BTWEEN_TAGS));
-			button.setPrefSize(TAG_WIDTH, TAG_HEIGHT);
-			
-		} else {
-			ImageView imageView = new ImageView();
-			tagsPane.getChildren().add(imageView);
-			imageView.setX(GAP_BTWEEN_TAGS+(paletteTagsCount % TAGS_MAX_COL_COUNT)*(TAG_WIDTH+GAP_BTWEEN_TAGS));
-			imageView.setY(GAP_BTWEEN_TAGS+(paletteTagsCount / TAGS_MAX_COL_COUNT)*(TAG_HEIGHT+GAP_BTWEEN_TAGS));
-			imageView.setFitWidth(TAG_WIDTH);
-			imageView.setFitHeight(TAG_HEIGHT);
-			Image img = new Image(Paths.get(tag.getPicturePath()).toUri().toString());
-			imageView.setImage(img);
-			Tooltip tooltip = new Tooltip(tag.getTagName());
-			tooltip.setFont(new Font("Arial", 16));
-			Tooltip.install(imageView,tooltip);
-		}
-		tagsPane.setPrefHeight(GAP_BTWEEN_TAGS+(1+paletteTagsCount / TAGS_MAX_COL_COUNT)*(TAG_HEIGHT+GAP_BTWEEN_TAGS));
-		paletteTagsCount++;
-		
+    @FXML
+    void addNewTagButtonClick(ActionEvent event) {
+    	Optional<String> newTagName = null;
+    	TextInputDialog tagInputDialog = UIHelper.newTagInputDialog();
+    	
+    	newTagName = tagInputDialog.showAndWait();
+    	if(newTagName.isPresent()) {
+    		System.out.println(newTagName.get());
+    		Tag newTag = TagDao.getTagByTagName(newTagName.get());
+    		if(newTag==null) {
+    			//Tag not found in already existing tags
+    			newTag = TagDao.createTagObject(newTagName.get(), "");
+    			TagDao.addTagToDb(newTag, false);
+    			UIHelper.addTagToPane(newTag, paletteTagsCount, tagsPane, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, TAGS_MAX_COL_COUNT);
+    			updateNewTagButtonPosition();
+    			
+    		}else {
+    			Alert tagExistsAlert = UIHelper.tagExistsAlert();
+    			tagExistsAlert.show();
+    		}
+    	}
+    	
+    }
+
+	public void updateNewTagButtonPosition() {
+		Point newAddNewTagButtonPosition = UIHelper.measureTagLayoutPosition(paletteTagsCount+1, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, TAGS_MAX_COL_COUNT);
+		addNewTagButton.setLayoutX(newAddNewTagButtonPosition.getX());
+		addNewTagButton.setLayoutY(newAddNewTagButtonPosition.getY());
 	}
+
+
+
+
+
+	
+
 	
 	
 }

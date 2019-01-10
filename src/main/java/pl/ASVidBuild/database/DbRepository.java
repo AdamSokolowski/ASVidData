@@ -2,6 +2,7 @@ package pl.ASVidBuild.database;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,8 +10,23 @@ import java.sql.Statement;
 public class DbRepository {
 
 	private static Connection conn = null;
+	
+	public static boolean createMainDatabase(){
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306?useSSL=false&useUnicode=true&characterEncoding=utf8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT", 
+					DbUtil.DB_USER, DbUtil.DB_PASS);
+			Statement statement = conn.createStatement();
+			statement.executeUpdate("CREATE DATABASE " +DbUtil.DB_NAME);
+			conn.close();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
-	public static void initDatabases() {
+	public static void initDatabaseTables() {
 		try {
 
 			conn = DbUtil.getConn();
@@ -134,6 +150,7 @@ public class DbRepository {
 		}
 	}*/
 
+	
 	public static String mySQLQueryGeneratorCreateTable(String tableName, String tabFields, String relation) {
 		return "CREATE TABLE " + tableName + " (id INT AUTO_INCREMENT PRIMARY KEY, " + tabFields + relation + ")";
 	}
