@@ -17,8 +17,11 @@ public class SettingsData {
 
 
 	private double soundVolume;
-	private int mediaPreviewPlayOption;
+	private int mediaPreviewPlayOption = 0;
+	private int autoPlayNextVidAfterCurrentIsOver = 0;
 	private String workFolder = "";
+	private String mpcExecPath = "C:/Program Files (x86)/K-Lite Codec Pack/MPC-HC64/mpc-hc64";
+	private String windowsMediaPlayerExecPath = "C:/Program Files (x86)/Windows Media Player/wmplayer";
 
 	private static SettingsData INSTANCE;
 	
@@ -63,12 +66,43 @@ public class SettingsData {
 		}
 	}
 
+	public boolean getAutoPlayNextVidAfterCurrentIsOver() {
+		return autoPlayNextVidAfterCurrentIsOver==1;
+	}
+
+	public void setAutoPlayNextVidAfterCurrentIsOver(boolean autoPlayNextVidAfterCurrentIsOver) {
+		if(autoPlayNextVidAfterCurrentIsOver) {
+			this.autoPlayNextVidAfterCurrentIsOver = 1;
+		} else {
+			this.autoPlayNextVidAfterCurrentIsOver = 0;
+		}
+		
+	}
+
 	public String getWorkFolder() {
 		return workFolder;
 	}
 
 	public void setWorkFolder(String workFolder) {
 		this.workFolder = workFolder;
+	}
+	
+	
+
+	public String getMpcExecPath() {
+		return mpcExecPath;
+	}
+
+	public void setMpcExecPath(String mpcExecPath) {
+		this.mpcExecPath = mpcExecPath;
+	}
+
+	public String getWindowsMediaPlayerExecPath() {
+		return windowsMediaPlayerExecPath;
+	}
+
+	public void setWindowsMediaPlayerExecPath(String windowsMediaPlayerExecPath) {
+		this.windowsMediaPlayerExecPath = windowsMediaPlayerExecPath;
 	}
 
 	public void saveToFile() {
@@ -85,7 +119,10 @@ public class SettingsData {
 				out = new PrintWriter(workFolder + "\\settings.ini");
 				out.println("SoundVolume = " + soundVolume);
 				out.println("MediaPreviewPlayOption = " + mediaPreviewPlayOption);
+				out.println("autoPlayNextVidAfterCurrentIsOver = " + autoPlayNextVidAfterCurrentIsOver);
 				out.println("WorkFolder = " + workFolder);
+				out.println("mpcExecPath = " + mpcExecPath);
+				out.println("windowsMediaPlayerExecPath = " + windowsMediaPlayerExecPath);
 				out.close();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -113,8 +150,16 @@ public class SettingsData {
 					case "MediaPreviewPlayOption":
 						mediaPreviewPlayOption = Integer.parseInt(s.substring(s.indexOf(" = ")+3));
 						break;
+					case "autoPlayNextVidAfterCurrentIsOver":
+						autoPlayNextVidAfterCurrentIsOver = Integer.parseInt(s.substring(s.indexOf(" = ")+3));
 					case "WorkFolder":
 						workFolder = s.substring(s.indexOf(" = ")+3);
+						break;
+					case "mpcExecPath":
+						mpcExecPath = s.substring(s.indexOf(" = ")+3);
+						break;
+					case "windowsMediaPlayerExecPath":
+						windowsMediaPlayerExecPath = s.substring(s.indexOf(" = ")+3);
 					}
 				}
 			} catch (FileNotFoundException e) {
@@ -123,7 +168,10 @@ public class SettingsData {
 		} else {
 			soundVolume = 40.0;
 			mediaPreviewPlayOption = 0;
+			autoPlayNextVidAfterCurrentIsOver = 0;
 			workFolder = "";
+			mpcExecPath = "C:/Program Files (x86)/K-Lite Codec Pack/MPC-HC64/mpc-hc64";
+			windowsMediaPlayerExecPath = "C:/Program Files (x86)/Windows Media Player/wmplayer";
 			saveToFile();
 		}
 	}

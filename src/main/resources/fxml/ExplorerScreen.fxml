@@ -97,7 +97,7 @@
                            </HBox.margin>
                         </Slider>
                         <Button fx:id="mainMediaViewMute" mnemonicParsing="false" onAction="#mainMediaViewMuteClick" prefHeight="25.0" prefWidth="68.0" text="Mute" />
-                        <Button fx:id="mainMediaViewFullScreen" mnemonicParsing="false" onAction="#mainMediaViewFullScreenClick" text="FullScreen">
+                        <Button fx:id="mainMediaViewFullScreen" disable="true" mnemonicParsing="false" onAction="#mainMediaViewFullScreenClick" text="FullScreen">
                            <HBox.margin>
                               <Insets left="40.0" />
                            </HBox.margin>
