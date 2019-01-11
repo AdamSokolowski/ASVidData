@@ -176,4 +176,13 @@ public class SettingsData {
 		}
 	}
 	
+	public void printDataSettings() {
+		System.out.println("SoundVolume = " + soundVolume);
+		System.out.println("MediaPreviewPlayOption = " + mediaPreviewPlayOption);
+		System.out.println("autoPlayNextVidAfterCurrentIsOver = " + autoPlayNextVidAfterCurrentIsOver);
+		System.out.println("WorkFolder = " + workFolder);
+		System.out.println("mpcExecPath = " + mpcExecPath);
+		System.out.println("windowsMediaPlayerExecPath = " + windowsMediaPlayerExecPath);
+	}
+	
 }

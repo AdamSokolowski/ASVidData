@@ -137,7 +137,7 @@ public class ExplorerScreenController {
 
 	private void initExplorerScreen() {
 		settingsData = SettingsData.getInstance();
-		mpcExecPath = settingsData.getMpcExecPath();
+		mpcExecPath  = settingsData.getMpcExecPath();
 		windowsMediaPlayerExecPath = settingsData.getWindowsMediaPlayerExecPath();
 		File file = new File(settingsData.getWorkFolder() + "\\LastPlaylist.asvpl");
 		if (file.exists()) {

@@ -51,7 +51,7 @@ public class OptionsScreenController {
 	}
 
 	public void setOptionsSettingsFromSettingsFile() {
-		SettingsData settingsData = SettingsData.getInstance();
+		settingsData = SettingsData.getInstance();
 		mpcExecPathTextField.setText(settingsData.getMpcExecPath());
 		windowsMediaPlayerExecPathTextField.setText(settingsData.getWindowsMediaPlayerExecPath());
 	}
@@ -65,7 +65,7 @@ public class OptionsScreenController {
     void windowsMediaPlayerExecPathBrowseClick(ActionEvent event) {
     	String filePath = UIHelper.openFileDialogFileName("Application(*.exe)", "exe");
 			if(filePath.endsWith(".exe")) {
-				filePath = filePath.substring(1, filePath.length()-4);
+				filePath = filePath.substring(0, filePath.length()-4);
 				windowsMediaPlayerExecPathTextField.setText(filePath);
 				settingsData.setWindowsMediaPlayerExecPath(filePath);
 				settingsData.saveToFile();
@@ -78,7 +78,7 @@ public class OptionsScreenController {
     void mpcExecPathBrowseClick(ActionEvent event) {
     	String filePath = UIHelper.openFileDialogFileName("Application(*.exe)", "exe");
 			if(filePath.endsWith(".exe")) {
-				filePath = filePath.substring(1, filePath.length()-4);
+				filePath = filePath.substring(0, filePath.length()-4);
 				mpcExecPathTextField.setText(filePath);
 				settingsData.setMpcExecPath(filePath);
 				settingsData.saveToFile();
