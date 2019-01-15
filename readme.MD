@@ -12,8 +12,15 @@ Therefore, it is recommended to not use it under different systems.
  - Download and install MySQLInstaller from web page: https://dev.mysql.com/downloads/mysql/
  - Download this repository to your Java Programming Environement
  - Convert it to Maven project
- - Set same user and password in MySQL workbench and pl.ASVidBuild.database.DbSet interface.
+ - Set user and password, matching your MySQL database access, inside java pl.ASVidBuild.database.DbSet interface.
  - Make sure your MySQL connection status is - running.
+ - If you don't want to use your MySQL root account for this application then you can create new user.
+Open MySQL command line and type in:
+```
+CREATE USER 'asviddatauser'@'%' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON asviddata.* TO 'asviddatauser'@'%';
+```
+Then change in pl.ASVidBuild.database.DbSet interface user to "asviddatauser" and password to "pass";
 
 
 
