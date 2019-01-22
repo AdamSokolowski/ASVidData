@@ -44,7 +44,6 @@ public class TagDao {
 		if (getTagByTagName(tagName) == null) { // media file does not exist in database
 			sql = "INSERT INTO Tag(tagName, picturePath) VALUES('" + tagName
 					+ "',  '" + picturePath.replace("\\", "\\\\") + "')";
-			System.out.println(sql);
 
 		} else {
 			if (autoUpdateWhenTagExistsInDb) {
@@ -68,6 +67,7 @@ public class TagDao {
 				}
 			}
 		}
+		tag.setId(getTagByTagName(tagName).getId());	//update tags id by one created in database
 	}
 	
 	public static void deleteTagfromDb(int id){
@@ -162,6 +162,7 @@ public class TagDao {
 		String sql = "SELECT Tag.* FROM Tag "
 				+ "JOIN MediaFile_Tag ON Tag.id=MediaFile_Tag.tag_id "
 				+ "JOIN MediaFile ON MediaFile_Tag.mediafile_id=MediaFile.id WHERE MediaFile.id="+mediaFile.getId();
+		System.out.println(sql);
 		List<Tag> result = new ArrayList<Tag>();
 		try {
 			conn = DbUtil.getConn();
@@ -189,7 +190,7 @@ public class TagDao {
 	
 	
 	
-	public static String TagDataToSting(Tag tag) {
+	public static String tagDataToString(Tag tag) {
 		return tag.getId() + ", " + tag.getTagName() + ", " + tag.getPicturePath();
 	}
 }

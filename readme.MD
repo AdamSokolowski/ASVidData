@@ -14,7 +14,8 @@ Therefore, it is recommended to not use it under different systems.
  - Convert it to Maven project
  - Set user and password, matching your MySQL database access, inside java pl.ASVidBuild.database.DbSet interface.
  - Make sure your MySQL connection status is - running.
- - If you don't want to use your MySQL root account for this application then you can create new user.
+ 
+#### If you don't want to use your MySQL root account for this application then you can create new user.
 Open MySQL command line and type in:
 ```
 CREATE USER 'asviddatauser'@'%' IDENTIFIED BY 'pass';
@@ -39,11 +40,11 @@ Above the playlist is expandable panel called Filter Tags.
 Currently it allows tags to be dropped inside Filter Tags expanded area.
 In future it will load all video files from database that have assigned every tag from Filter Tags panel area. This feature is yet to be implemented.
 Below the in-app media player frame are located controls for media player as well as Tags Picker button.
-Tags Picker button opens new panel that displays all tags as well as button to add a new tag.
-At the moment Tags from Tags Picker can be dragged into expanded panel of Filter Tags.
-There will be another panel that will allow to assign tags to currently selected media file. This feature is yet to be implemented.
+Tags Picker button opens new panel that displays all tags. Theres also a button to add a new tag.
+At the moment Tags from Tags Picker can be dragged into expanded panel of Filter Tags and panel of Selected File Tags.
+Panel of Selected File Tags allow to assign tags to currently selected media file. Option to remove tags is not yet implemented.
 ### Database - window added for data management.
-Currently its only added for future purposes.
+Currently its empty. It was added for future purposes.
 ### Options - window for changing application settings.
 So far, here you can setup paths to executable files of Windows Media Player and Media Player Classic, depending on where those were installed.
 In future there will be option to set in-app media player behavior. 2 options have already been placed there, those options are not yet implemented.
@@ -59,18 +60,12 @@ When application is beeing launched for the first time:
 
 # To Do List:
 - Set options that make external mediaplayers paths be set dynamically,
-- Give ability to delete Tags from Tags Filter via drag-drop.
-- Disallow already added tag to be placed again in Tags Filter.
-- Set tags pick (add tag to file/filter list by tags) in Explorer view,
-- Implement Tags adding to media files.
-- Make new Drag-Drop panel to add Tags to selected video file.
-- Make a field in explorer window for adding Tags to selected media file.
+- Give ability to delete Tags from Tags Filter and File Tags panel via drag-drop.
 - Make TagsFilter loading videos from database that have tags from tags filter
 - Add ability to assign pictures to tags.
 - Create thumbnails from mediaplayer screen shots,
 - Add small Thumbnail formatting from file on Hard Drive and mediaplayer screenshot.
 - Implement small picture option for Tags and Media Files.
-
 - Make option to automatically play another video in playlist when previous is finished.
 - Set option pick for mediaplayer to play fragments/full length of Media.
 - Make unsupported video files for in-app media player automatically be opened in one of external media players.
@@ -79,13 +74,13 @@ When application is beeing launched for the first time:
 - Add ability to reset application setup and data eg. database drop-and-create
 - Add option to backup database data into a file.
 - Add FullScreen for MediaPlayer.
-- Fix issue with video not going into stop mode after finished playing.
 - Fix video progressbar responsiveness.
 
 
 # Disclaimer:
 Application is still under development. Many features are yet not implemented. Some bugs may occure.
 It is 1st JavaFX application I've ever made. Therefore, if you are advanced Full-Stack Java Developer you might see it beeing far from perfect.
+Also its far from beeing complete.
 
 
 

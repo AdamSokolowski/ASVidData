@@ -34,7 +34,9 @@ public class MediaFile {
 		this.fileRating = fileRating;
 	}
 	
-	
+	public static String mediaFileDataToSting(MediaFile mf) {
+		return mf.getId() + ", " + mf.getFilePath() + ", " + mf.getPicturePath() + ", " + mf.getFileRating();
+	}
 	
 	
 }

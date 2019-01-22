@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 
 import javafx.beans.binding.Bindings;
@@ -32,6 +33,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -43,6 +45,8 @@ import pl.ASVidBuild.UI.UIHelper;
 import pl.ASVidBuild.database.DbRepository;
 import pl.ASVidBuild.database.dao.MediaFileDao;
 import pl.ASVidBuild.database.dao.TagDao;
+import pl.ASVidBuild.database.pojo.MediaFile;
+import pl.ASVidBuild.database.pojo.Tag;
 
 /**
  * 
@@ -111,20 +115,28 @@ public class ExplorerScreenController {
 	private Pane filterTagsVidPlayList;
 
 	@FXML
+	private Pane fileTagsListPanel;
+
+	@FXML
+	private Button fileTagsListPanelAnyFileButton;
+
+	@FXML
 	private TitledPane filterTagsFrame;
 
 	private MediaPlayer mediaPlayer;
 
 	private String selectedFilePath = "";
 
+	private List<Integer> fileTagsListPanelId = new LinkedList<Integer>();
+
+	private List<Integer> filterTagsVidPlayListId = new LinkedList<Integer>();
+
 	private SettingsData settingsData;
 
 	private MainScreenController mainScreenController;
 
-	private int filterTagsCount = 0;
-
-	private static final int TAG_HEIGHT = 75;
 	private static final int TAG_WIDTH = 100;
+	private static final int TAG_HEIGHT = 75;
 	private static final int GAP_BTWEEN_TAGS = 3;
 	private static final int TAGS_MAX_ROWS_COUNT = 1;
 
@@ -137,7 +149,7 @@ public class ExplorerScreenController {
 
 	private void initExplorerScreen() {
 		settingsData = SettingsData.getInstance();
-		mpcExecPath  = settingsData.getMpcExecPath();
+		mpcExecPath = settingsData.getMpcExecPath();
 		windowsMediaPlayerExecPath = settingsData.getWindowsMediaPlayerExecPath();
 		File file = new File(settingsData.getWorkFolder() + "\\LastPlaylist.asvpl");
 		if (file.exists()) {
@@ -152,6 +164,7 @@ public class ExplorerScreenController {
 				tagsFilterFrameExpandedResize(newValue);
 			}
 		});
+
 	}
 
 	@FXML
@@ -266,8 +279,13 @@ public class ExplorerScreenController {
 
 	@FXML
 	void vidPlayListClick(MouseEvent event) {
-		if (event.getButton().equals(MouseButton.PRIMARY) && vidPlayList.getItems().isEmpty() == false) {
+		if (event.getButton().equals(MouseButton.PRIMARY)
+				&& vidPlayList.getSelectionModel().getSelectedItem().isEmpty() == false) {
 
+			fileTagsListPanelId.clear();
+			UIHelper.tagsListPanelClear(fileTagsListPanel, fileTagsListPanelAnyFileButton, GAP_BTWEEN_TAGS, TAG_WIDTH,
+					TAG_HEIGHT);
+			fileTagsListPanelLoadFileTags();
 			playSelectedVidPlayListItem();
 		}
 	}
@@ -276,15 +294,19 @@ public class ExplorerScreenController {
 		try {
 			Path path = Paths.get(vidPlayList.getSelectionModel().getSelectedItem().toString());
 			String filePath = path.toUri().toString();
+			
 			if (selectedFilePath.compareTo(filePath) != 0) {
 				if (mediaPlayer != null) {
 					mediaPlayer.stop();
+					System.out.println("Media file could not be opened.");
 				}
 				selectedFilePath = filePath;
 				System.out.println("Opened file in MediaPlayer - " + filePath);
 				Media media = new Media(filePath);
 				mediaPlayer = new MediaPlayer(media);
 				mainMediaView.setMediaPlayer(mediaPlayer);
+				
+				
 				mediaPlayer.play();
 				mediaPlayer.setVolume(mainMediaViewVolume.getValue() / 100);
 				if (mainMediaViewMute.textProperty().isEqualTo("Unmute").getValue()) {
@@ -292,12 +314,21 @@ public class ExplorerScreenController {
 				}
 				mainMediaViewPanel.setDisable(false);
 
-				mainMediaViewPlayProgress.maxProperty().bind(Bindings.createDoubleBinding(
-						() -> mediaPlayer.getTotalDuration().toSeconds(), mediaPlayer.totalDurationProperty()));
+				// mainMediaViewPlayProgress.maxProperty().bind(Bindings.createDoubleBinding(
+				// () -> mediaPlayer.getTotalDuration().toSeconds(),
+				// mediaPlayer.totalDurationProperty()));
 
 				// mainMediaViewPlayProgress.valueProperty().bind(Bindings.createDoubleBinding(()
 				// -> mediaPlayer.getCurrentTime().toSeconds(),
 				// mediaPlayer.currentTimeProperty()));
+
+				mediaPlayer.totalDurationProperty().addListener(new ChangeListener<Duration>() {
+					@Override
+					public void changed(ObservableValue<? extends Duration> observable, Duration oldValue,
+							Duration newValue) {
+						mainMediaViewPlayProgress.setMax(newValue.toSeconds());
+					}
+				});
 
 				mediaPlayer.currentTimeProperty().addListener(new ChangeListener<Duration>() {
 					@Override
@@ -306,6 +337,27 @@ public class ExplorerScreenController {
 						mainMediaViewPlayProgress.setValue(newValue.toSeconds());
 					}
 				});
+
+				mediaPlayer.setOnEndOfMedia(new Runnable() {
+
+					@Override
+					public void run() {
+						mediaPlayer.stop();
+						mainMediaViewPlay.setText("Play");
+
+					}
+
+				});
+				mediaPlayer.statusProperty().addListener(new ChangeListener<Status>() {
+
+					@Override
+					public void changed(ObservableValue<? extends Status> observable, Status oldValue,
+							Status newValue) {
+						System.out.println(newValue.toString());
+					}
+
+				});
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -435,17 +487,55 @@ public class ExplorerScreenController {
 	@FXML
 	void filterTagsVidPlayListDragDropped(DragEvent event) {
 
-		UIHelper.addTagToPane(TagDao.getTagById(UIHelper.getDraggedTagId()), filterTagsCount, filterTagsVidPlayList,
-				GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, 0);
-		UIHelper.setDraggedSourceIsATag(false);
-		filterTagsCount++;
+		Integer tagId = UIHelper.getDraggedTagId();
+		if (!filterTagsVidPlayListId.contains(tagId)) {
 
+			UIHelper.addTagToPane(TagDao.getTagById(tagId), filterTagsVidPlayList.getChildren().size() - 1,
+					filterTagsVidPlayList, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, 0);
+			filterTagsVidPlayListId.add(tagId);
+		}
 	}
 
 	@FXML
 	void filterTagsVidPlayListDragOver(DragEvent event) {
 		if (UIHelper.isDraggedSourceATag()) {
 			event.acceptTransferModes(TransferMode.ANY);
+		}
+	}
+
+	@FXML
+	void fileTagsListPanelDragDropped(DragEvent event) {
+
+		Integer tagId = UIHelper.getDraggedTagId();
+		if (!fileTagsListPanelId.contains(tagId)) {
+
+			UIHelper.addTagToPane(TagDao.getTagById(UIHelper.getDraggedTagId()), fileTagsListPanel.getChildren().size(),
+					fileTagsListPanel, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, 0);
+			fileTagsListPanelId.add(tagId);
+			Tag tag = TagDao.getTagById(tagId);
+			MediaFile mediaFile = MediaFileDao
+					.getMediaFileByFilePath(vidPlayList.getSelectionModel().getSelectedItem().toString());
+			MediaFileDao.AddTagToMediaFile(tag, mediaFile);
+		}
+	}
+
+	@FXML
+	void fileTagsListPanelDragOver(DragEvent event) {
+		if (UIHelper.isDraggedSourceATag()) {
+			event.acceptTransferModes(TransferMode.ANY);
+		}
+	}
+
+	private void fileTagsListPanelLoadFileTags() {
+		MediaFile selectedMediaFile = MediaFileDao
+				.getMediaFileByFilePath(vidPlayList.getSelectionModel().getSelectedItem().toString());
+		List<Tag> selectedMediaFileTags = TagDao.getAllTagsOfMediaFile(selectedMediaFile);
+		if (!selectedMediaFileTags.isEmpty()) {
+			for (int i = 0; i < selectedMediaFileTags.size(); i++) {
+				UIHelper.addTagToPane(selectedMediaFileTags.get(i), fileTagsListPanel.getChildren().size(),
+						fileTagsListPanel, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, 0);
+				fileTagsListPanelId.add(selectedMediaFileTags.get(i).getId());
+			}
 		}
 	}
 

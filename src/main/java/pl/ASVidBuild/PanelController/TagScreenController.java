@@ -52,6 +52,7 @@ public class TagScreenController {
     
 	@FXML
 	public void initialize() {
+		//Fill out the tag screen with all tags from database.
 		List<Tag> allTags = TagDao.getAllTags();
 		for (int i=0; i<allTags.size();i++) {
 			UIHelper.addTagToPane(TagDao.getAllTags().get(i), paletteTagsCount, tagsPane, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, TAGS_MAX_COL_COUNT);
@@ -74,8 +75,10 @@ public class TagScreenController {
     			//Tag not found in already existing tags
     			newTag = TagDao.createTagObject(newTagName.get(), "");
     			TagDao.addTagToDb(newTag, false);
+    			
     			UIHelper.addTagToPane(newTag, paletteTagsCount, tagsPane, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, TAGS_MAX_COL_COUNT);
     			updateNewTagButtonPosition();
+    			paletteTagsCount++; 
     			
     		}else {
     			Alert tagExistsAlert = UIHelper.tagExistsAlert();
@@ -86,6 +89,7 @@ public class TagScreenController {
     }
 
 	public void updateNewTagButtonPosition() {
+		//moves New Tag Button to position after newly added tag button/image
 		Point newAddNewTagButtonPosition = UIHelper.measureTagLayoutPosition(paletteTagsCount+1, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, TAGS_MAX_COL_COUNT);
 		addNewTagButton.setLayoutX(newAddNewTagButtonPosition.getX());
 		addNewTagButton.setLayoutY(newAddNewTagButtonPosition.getY());

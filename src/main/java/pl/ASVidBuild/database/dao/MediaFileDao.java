@@ -155,6 +155,32 @@ public class MediaFileDao {
 		return getMediaFileByFilePath(filePath) != null;
 	}
 
+	public static boolean mediaFileTagAlreadyAdded(MediaFile mf, Tag tag) {
+		
+		String sql = "SELECT * from MediaFile "
+				+ "JOIN MediaFile_Tag ON MediaFile.id=MediaFile_Tag.MediaFile_id "
+				+ "JOIN Tag ON Tag.id=MediaFile_Tag.Tag_id WHERE MediaFile.id=" + mf.getId() + " AND Tag.id="
+				+ tag.getId();
+		boolean result = false;
+		try {
+			conn = DbUtil.getConn();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			if (rs.next()) {
+				result = true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
+
 	public static MediaFile getMediaFileByFilePath(String filePath) {
 		String sql = "SELECT * FROM MediaFile WHERE filePath='" + filePath.replace("\\", "\\\\") + "'";
 		MediaFile result = null;
@@ -208,6 +234,7 @@ public class MediaFileDao {
 	public static void AddTagToMediaFile(Tag tag, MediaFile mediaFile) {
 		String sql = "INSERT INTO MediaFile_Tag(mediafile_id, tag_id) VALUES(" + mediaFile.getId() + ", " + tag.getId()
 				+ ")";
+		if(!mediaFileTagAlreadyAdded(mediaFile, tag)) {
 		try {
 			conn = DbUtil.getConn();
 			Statement stmt = conn.createStatement();
@@ -220,7 +247,7 @@ public class MediaFileDao {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		}
+		}}
 	}
 
 	public static List<MediaFile> getAllMediaFilesTaggedWithTag(Tag tag) {
@@ -251,7 +278,4 @@ public class MediaFileDao {
 
 	}
 
-	public static String mediaFileDataToSting(MediaFile mf) {
-		return mf.getId() + ", " + mf.getFilePath() + ", " + mf.getPicturePath() + ", " + mf.getFileRating();
-	}
 }
