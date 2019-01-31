@@ -42,7 +42,7 @@ In future it will load all video files from database that have assigned every ta
 Below the in-app media player frame are located controls for media player as well as Tags Picker button.
 Tags Picker button opens new panel that displays all tags. Theres also a button to add a new tag.
 At the moment Tags from Tags Picker can be dragged into expanded panel of Filter Tags and panel of Selected File Tags.
-Panel of Selected File Tags allow to assign tags to currently selected media file. Option to remove tags is not yet implemented.
+Panel of Selected File Tags allow to assign tags to currently selected media file. To remove tags from file just drag them to trash can icon.
 ### Database - window added for data management.
 Currently its empty. It was added for future purposes.
 ### Options - window for changing application settings.
@@ -60,7 +60,7 @@ When application is beeing launched for the first time:
 
 # To Do List:
 - Set options that make external mediaplayers paths be set dynamically,
-- Give ability to delete Tags from Tags Filter and File Tags panel via drag-drop.
+- Give ability to delete Tags from Tags Filter panel via drag over trash can icon.
 - Make TagsFilter loading videos from database that have tags from tags filter
 - Add ability to assign pictures to tags.
 - Create thumbnails from mediaplayer screen shots,
@@ -79,8 +79,7 @@ When application is beeing launched for the first time:
 
 # Disclaimer:
 Application is still under development. Many features are yet not implemented. Some bugs may occure.
-It is 1st JavaFX application I've ever made. Therefore, if you are advanced Full-Stack Java Developer you might see it beeing far from perfect.
-Also its far from beeing complete.
+It is 1st JavaFX application I've ever made. Also its far from beeing complete.
 
 
 

@@ -9,6 +9,8 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -151,5 +153,10 @@
             </AnchorPane>
         </content>
       </TitledPane>
+      <ImageView fx:id="tagsTrash" fitHeight="59.0" fitWidth="54.0" layoutX="632.0" layoutY="678.0" onDragDropped="#tagsTrashDragDropped" onDragOver="#tagsTrashDragOver" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../pictures/trash%20can%20square.png" />
+         </image>
+      </ImageView>
    </children>
 </Pane>

@@ -231,7 +231,7 @@ public class MediaFileDao {
 
 	}
 
-	public static void AddTagToMediaFile(Tag tag, MediaFile mediaFile) {
+	public static void addTagToMediaFile(Tag tag, MediaFile mediaFile) {
 		String sql = "INSERT INTO MediaFile_Tag(mediafile_id, tag_id) VALUES(" + mediaFile.getId() + ", " + tag.getId()
 				+ ")";
 		if(!mediaFileTagAlreadyAdded(mediaFile, tag)) {
@@ -248,6 +248,23 @@ public class MediaFileDao {
 				e.printStackTrace();
 			}
 		}}
+	}
+	
+	public static void deleteTagFromMediaFile(Tag tag, MediaFile mediaFile) {
+		String sql = "DELETE FROM MediaFile_Tag WHERE MediaFile_id = "+ mediaFile.getId() + " AND Tag_id = " + tag.getId();
+		try {
+			conn = DbUtil.getConn();
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static List<MediaFile> getAllMediaFilesTaggedWithTag(Tag tag) {
