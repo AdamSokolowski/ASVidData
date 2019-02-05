@@ -21,6 +21,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
@@ -44,6 +45,9 @@ import pl.ASVidBuild.SettingsData;
 import pl.ASVidBuild.PanelController.MainScreenController;
 import pl.ASVidBuild.PlaylistConvert.*;
 import pl.ASVidBuild.UI.UIHelper;
+import pl.ASVidBuild.UI.TagContainer.TagClipboard;
+import pl.ASVidBuild.UI.TagContainer.TagsPane;
+import pl.ASVidBuild.UI.TagContainer.TagsPane.ButtonPlaceHolderType;
 import pl.ASVidBuild.database.DbRepository;
 import pl.ASVidBuild.database.dao.MediaFileDao;
 import pl.ASVidBuild.database.dao.TagDao;
@@ -113,11 +117,15 @@ public class ExplorerScreenController {
 	@FXML
 	private ContextMenu vidPlayListMenu;
 
-	@FXML
-	private Pane filterTagsVidPlayList;
+	private TagsPane fileTagsListPanel;
 
 	@FXML
-	private Pane fileTagsListPanel;
+	private ScrollPane fileTagsListScrollPanel;
+
+	@FXML
+	private ScrollPane filterTagsScrollPanel;
+
+	private TagsPane filterTagsPanel;
 
 	@FXML
 	private Button fileTagsListPanelAnyFileButton;
@@ -157,6 +165,58 @@ public class ExplorerScreenController {
 		mpcExecPath = settingsData.getMpcExecPath();
 		windowsMediaPlayerExecPath = settingsData.getWindowsMediaPlayerExecPath();
 		File file = new File(settingsData.getWorkFolder() + "\\LastPlaylist.asvpl");
+
+		fileTagsListPanel = new TagsPane(fileTagsListScrollPanel);
+		fileTagsListPanel.setId("fileTagsListPanel");
+		fileTagsListPanel.setOnDragOver(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				if (TagClipboard.isDraggedSourceATag()) {
+					event.acceptTransferModes(TransferMode.ANY);
+				}
+			}
+		});
+		fileTagsListPanel.setOnDragDropped(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				Integer tagId = TagClipboard.getDraggedTagId();
+				if (fileTagsListPanel.tagFoundInTagItems(tagId) == -1) {
+					Tag tag = TagDao.getTagById(tagId);
+					MediaFile mediaFile = MediaFileDao
+							.getMediaFileByFilePath(vidPlayList.getSelectionModel().getSelectedItem().toString());
+					MediaFileDao.addTagToMediaFile(tag, mediaFile);
+					fileTagsListPanel.addTag(tag);
+				}
+			}
+		});
+
+		filterTagsPanel = new TagsPane(filterTagsScrollPanel, ButtonPlaceHolderType.EMPTY_TAG_LIST, "No Tags Added");
+		filterTagsPanel.setId("filterTagsPanel");
+		filterTagsPanel.setOnDragOver(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				if (TagClipboard.isDraggedSourceATag()) {
+					event.acceptTransferModes(TransferMode.ANY);
+				}
+			}
+		});
+		filterTagsPanel.setOnDragDropped(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				Integer tagId = TagClipboard.getDraggedTagId();
+				if (filterTagsPanel.tagFoundInTagItems(tagId) == -1) {
+					Tag tag = TagDao.getTagById(tagId);
+					filterTagsPanel.addTag(tag);
+				}
+
+			}
+
+		});
+
 		if (file.exists()) {
 			vidPlayList.setItems(FXCollections
 					.observableArrayList(LastPlayList.load(settingsData.getWorkFolder() + "\\LastPlaylist.asvpl")));
@@ -287,10 +347,11 @@ public class ExplorerScreenController {
 		if (event.getButton().equals(MouseButton.PRIMARY)
 				&& vidPlayList.getSelectionModel().getSelectedItem().isEmpty() == false) {
 
-			fileTagsListPanelId.clear();
-			UIHelper.tagsListPanelClear(fileTagsListPanel, fileTagsListPanelAnyFileButton, GAP_BTWEEN_TAGS, TAG_WIDTH,
-					TAG_HEIGHT);
-			fileTagsListPanelLoadFileTags();
+			fileTagsListPanel.clearTagItemsList();
+
+			String filePath = vidPlayList.getSelectionModel().getSelectedItem().toString();
+			fileTagsListPanel.loadFileTags(filePath);
+
 			playSelectedVidPlayListItem();
 		}
 	}
@@ -317,14 +378,6 @@ public class ExplorerScreenController {
 					mediaPlayer.muteProperty().set(true);
 				}
 				mainMediaViewPanel.setDisable(false);
-
-				// mainMediaViewPlayProgress.maxProperty().bind(Bindings.createDoubleBinding(
-				// () -> mediaPlayer.getTotalDuration().toSeconds(),
-				// mediaPlayer.totalDurationProperty()));
-
-				// mainMediaViewPlayProgress.valueProperty().bind(Bindings.createDoubleBinding(()
-				// -> mediaPlayer.getCurrentTime().toSeconds(),
-				// mediaPlayer.currentTimeProperty()));
 
 				mediaPlayer.totalDurationProperty().addListener(new ChangeListener<Duration>() {
 					@Override
@@ -491,18 +544,16 @@ public class ExplorerScreenController {
 	@FXML
 	void filterTagsVidPlayListDragDropped(DragEvent event) {
 
-		Integer tagId = UIHelper.getDraggedTagId();
+		Integer tagId = TagClipboard.getDraggedTagId();
 		if (!filterTagsVidPlayListId.contains(tagId)) {
 
-			UIHelper.addTagToPane(TagDao.getTagById(tagId), filterTagsVidPlayList.getChildren().size() - 1,
-					filterTagsVidPlayList, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, 0);
 			filterTagsVidPlayListId.add(tagId);
 		}
 	}
 
 	@FXML
 	void filterTagsVidPlayListDragOver(DragEvent event) {
-		if (UIHelper.isDraggedSourceATag()) {
+		if (TagClipboard.isDraggedSourceATag()) {
 			event.acceptTransferModes(TransferMode.ANY);
 		}
 	}
@@ -510,12 +561,8 @@ public class ExplorerScreenController {
 	@FXML
 	void fileTagsListPanelDragDropped(DragEvent event) {
 
-		Integer tagId = UIHelper.getDraggedTagId();
+		Integer tagId = TagClipboard.getDraggedTagId();
 		if (!fileTagsListPanelId.contains(tagId)) {
-
-			UIHelper.addTagToPane(TagDao.getTagById(UIHelper.getDraggedTagId()), fileTagsListPanel.getChildren().size(),
-					fileTagsListPanel, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, 0);
-
 			fileTagsListPanelId.add(tagId);
 			Tag tag = TagDao.getTagById(tagId);
 			MediaFile mediaFile = MediaFileDao
@@ -526,51 +573,39 @@ public class ExplorerScreenController {
 
 	@FXML
 	void fileTagsListPanelDragOver(DragEvent event) {
-		if (UIHelper.isDraggedSourceATag()) {
+		if (TagClipboard.isDraggedSourceATag()) {
 			event.acceptTransferModes(TransferMode.ANY);
 		}
 	}
 
-	private void fileTagsListPanelLoadFileTags() {
-		MediaFile selectedMediaFile = MediaFileDao
-				.getMediaFileByFilePath(vidPlayList.getSelectionModel().getSelectedItem().toString());
-		List<Tag> selectedMediaFileTags = TagDao.getAllTagsOfMediaFile(selectedMediaFile);
-		if (!selectedMediaFileTags.isEmpty()) {
-			for (int i = 0; i < selectedMediaFileTags.size(); i++) {
-				UIHelper.addTagToPane(selectedMediaFileTags.get(i), fileTagsListPanel.getChildren().size(),
-						fileTagsListPanel, GAP_BTWEEN_TAGS, TAG_WIDTH, TAG_HEIGHT, 0);
-				fileTagsListPanelId.add(selectedMediaFileTags.get(i).getId());
+	@FXML
+	void tagsTrashDragDropped(DragEvent event) {
+		Integer tagId = TagClipboard.getDraggedTagId();
+		Tag tag = TagDao.getTagById(tagId);
+
+		if (TagClipboard.getDraggedSourceParent().equals(fileTagsListPanel.getId())) {
+			MediaFile selectedMediaFile = MediaFileDao
+					.getMediaFileByFilePath(vidPlayList.getSelectionModel().getSelectedItem().toString());
+
+			MediaFileDao.deleteTagFromMediaFile(tag, selectedMediaFile);
+
+			fileTagsListPanel.clearTagItemsList();
+			String filePath = vidPlayList.getSelectionModel().getSelectedItem().toString();
+			fileTagsListPanel.loadFileTags(filePath);
+
+			System.out.println("Tag " + tag.getTagName() + " is no longer assigned to media file: "
+					+ vidPlayList.getSelectionModel().getSelectedItem().toString());
+
+		} else {
+			if (TagClipboard.getDraggedSourceParent().equals(filterTagsPanel.getId())) {
+				filterTagsPanel.removeTagfromTagsPaneLayout(tag);
 			}
 		}
 	}
 
 	@FXML
-    void tagsTrashDragDropped(DragEvent event) {
-    	Integer tagId = UIHelper.getDraggedTagId();
-    	Tag tag = TagDao.getTagById(tagId);
-    	if(UIHelper.getDraggedSourceParent().equals(fileTagsListPanel.getId())) {
-    	MediaFile selectedMediaFile = MediaFileDao
-				.getMediaFileByFilePath(vidPlayList.getSelectionModel().getSelectedItem().toString());
-    	
-    	MediaFileDao.deleteTagFromMediaFile(tag, selectedMediaFile);
-    	
-    	fileTagsListPanelId.clear();
-		UIHelper.tagsListPanelClear(fileTagsListPanel, fileTagsListPanelAnyFileButton, GAP_BTWEEN_TAGS, TAG_WIDTH,
-				TAG_HEIGHT);
-		fileTagsListPanelLoadFileTags();
-		System.out.println("Tag "+ tag.getTagName() +" is no longer assigned to media file: "+ vidPlayList.getSelectionModel().getSelectedItem().toString());
-
-    	} else {
-    		if(UIHelper.getDraggedSourceParent().equals(filterTagsVidPlayList.getId())) {
-    			//place a method to delete tag from filter tags here.
-    	}
-    	}
-		UIHelper.setDraggedSourceParent(null);    	
-    }
-
-	@FXML
 	void tagsTrashDragOver(DragEvent event) {
-		if (UIHelper.isDraggedSourceATag()) {
+		if (TagClipboard.isDraggedSourceATag()) {
 			event.acceptTransferModes(TransferMode.ANY);
 		}
 	}

@@ -26,7 +26,6 @@ public class LastPlayList {
 					listItems.add(scan.nextLine());
 				}
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return listItems.toArray(new String[listItems.size()]);

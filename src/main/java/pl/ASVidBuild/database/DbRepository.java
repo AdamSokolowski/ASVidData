@@ -88,67 +88,7 @@ public class DbRepository {
 		return false;
 	}
 
-	/*public static boolean mediaFileExistsInDb(String filePath, Connection databaseConnection) throws SQLException {
-		Statement statement = databaseConnection.createStatement();
-		ResultSet fileFound = statement.executeQuery("SELECT * FROM MediaFile WHERE filePath = \"" + filePath.replace("\\", "\\\\") + "\"");
-		if (fileFound.next()) {
-			return true;
-		}
-		return false;
-	}*/
 
-	/*public static void addMediaFilesToDb(String[] filePathList) {
-
-
-		try {
-			conn = DbUtil.getConn();
-			for (int i = 0; i < filePathList.length; i++) {
-
-				if (!mediaFileExistsInDb(filePathList[i], conn)) {
-					String sqlAddFileToDb = mySQLQueryGeneratorAddRecord("MediaFile", "filePath",
-							"\"" + filePathList[i].replace("\\", "\\\\") + "\"");
-					Statement statement = conn.createStatement();
-					statement.executeUpdate(sqlAddFileToDb);
-					System.out.println(sqlAddFileToDb);
-				}
-
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}*/
-
-/*	public static void addTagsToDb(String[] tagsList) {
-
-
-		try {
-			conn = DbUtil.getConn();
-			for (int i = 0; i < tagsList.length; i++) {
-				String sqlAddTagToDb = mySQLQueryGeneratorAddRecord("Tag", "\"tagName\"", tagsList[i]);
-				Statement statement = conn.createStatement();
-				// statement.executeUpdate(sqlAddTagToDb);
-				System.out.println(sqlAddTagToDb);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}*/
 
 	
 	public static String mySQLQueryGeneratorCreateTable(String tableName, String tabFields, String relation) {
