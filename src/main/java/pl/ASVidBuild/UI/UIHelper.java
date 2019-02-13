@@ -33,7 +33,7 @@ import pl.ASVidBuild.database.pojo.Tag;
  *
  */
 public class UIHelper {
-
+	
 	public static Point measureTagLayoutPosition(int existingTagsCount, int gapBtweenTags, int tagWidth, int tagHeight,
 			int tagsMaxColCountValue) {
 		Point point = new Point();
@@ -74,6 +74,15 @@ public class UIHelper {
 		tagExistsAlert.setContentText("Please find this tag in tags list.");
 		tagExistsAlert.initModality(Modality.APPLICATION_MODAL);
 		return tagExistsAlert;
+	}
+	
+	public static Alert executeTagFilterAlert() {
+		Alert executeTagFilterAlert = new Alert(AlertType.CONFIRMATION);
+		executeTagFilterAlert.setTitle("Filter Tags");
+		executeTagFilterAlert.setHeaderText("Do you want playlist to load media files having each filter tag?");
+		executeTagFilterAlert.setContentText("Current playlist will be replaced with loaded media files.");
+		executeTagFilterAlert.initModality(Modality.APPLICATION_MODAL);
+		return executeTagFilterAlert;
 	}
 
 	public static String openFileDialogFileName(String fileTypeDescription, String fileTypeExtension) {

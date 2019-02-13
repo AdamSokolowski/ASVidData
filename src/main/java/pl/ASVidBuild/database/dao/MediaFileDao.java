@@ -38,50 +38,30 @@ public class MediaFileDao {
 		return mf;
 	}
 
+	
 	public static void addMediaFileToDb(MediaFile mediaFile, boolean autoUpdateWhenMediaFileExistsInDb) {
 		String filePath = mediaFile.getFilePath();
 		String picturePath = mediaFile.getPicturePath();
 		byte fileRating = mediaFile.getFileRating();
-		String sql = "";
+		try {
+			conn = DbUtil.getConn();
+		
 		if (mediaFileExistsInDb(filePath)) {
 			if (autoUpdateWhenMediaFileExistsInDb) {
-				/*
-				 * sql = "UPDATE MediaFile SET picturePath = '" +
-				 * picturePath.replace("\\", "\\\\") + "', fileRating = " + fileRating +
-				 * " WHERE filePath = '" + filePath.replace("\\", "\\\\") + "'";
-				 * System.out.println(sql);
-				 */
-				sql = DbRepository.mySQLQueryGeneratorUpdateRecordValues("MediaFile", "picturePath, fileRating",
-						"'" + picturePath.replace("\\", "\\\\") + "', " + fileRating,
-						"filePath='" + filePath.replace("\\", "\\\\") + "'");
+				DbRepository.mySQLUpdateRecord("MediaFile", "picturePath, fileRating", "'" + picturePath.replace("\\", "\\\\") + "', " + fileRating,
+						"filePath='" + filePath.replace("\\", "\\\\") + "'", conn);
 			}
 		} else {
-
-			/*
-			 * sql = "INSERT INTO MediaFile(filePath, picturePath, fileRating) VALUES('" +
-			 * filePath.replace("\\", "\\\\") + "', '" +
-			 * picturePath.replace("\\", "\\\\") + "', " + fileRating + ")";
-			 * System.out.println(sql);
-			 */
-			sql = DbRepository.mySQLQueryGeneratorAddRecord("MediaFile", "filePath, picturePath, fileRating", "'"
-					+ filePath.replace("\\", "\\\\") + "', '" + picturePath.replace("\\", "\\\\") + "', " + fileRating);
-
+			DbRepository.mySQLAddRecord("MediaFile", "picturePath, fileRating", "'" + picturePath.replace("\\", "\\\\") + "', " + fileRating, conn);
 		}
-		if (!sql.equals("")) {
-			try {
-				conn = DbUtil.getConn();
-				Statement stmt = conn.createStatement();
-				System.out.println(sql);
-				stmt.executeUpdate(sql);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				if (conn != null) {
-					try {
-						conn.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -92,12 +72,9 @@ public class MediaFileDao {
 		try {
 			for (int i = 0; i < filePathList.length; i++) {
 				if (!mediaFileExistsInDb(filePathList[i])) {
-					String sqlAddFileToDb = DbRepository.mySQLQueryGeneratorAddRecord("MediaFile", "filePath",
-							"'" + filePathList[i].replace("\\", "\\\\") + "'");
 					conn = DbUtil.getConn();
-					Statement statement = conn.createStatement();
-					statement.executeUpdate(sqlAddFileToDb);
-					System.out.println(sqlAddFileToDb);
+					DbRepository.mySQLAddRecord("MediaFile", "filePath",filePathList[i], conn);
+
 				}
 
 			}
@@ -156,9 +133,8 @@ public class MediaFileDao {
 	}
 
 	public static boolean mediaFileTagAlreadyAdded(MediaFile mf, Tag tag) {
-		
-		String sql = "SELECT * from MediaFile "
-				+ "JOIN MediaFile_Tag ON MediaFile.id=MediaFile_Tag.MediaFile_id "
+
+		String sql = "SELECT * from MediaFile " + "JOIN MediaFile_Tag ON MediaFile.id=MediaFile_Tag.MediaFile_id "
 				+ "JOIN Tag ON Tag.id=MediaFile_Tag.Tag_id WHERE MediaFile.id=" + mf.getId() + " AND Tag.id="
 				+ tag.getId();
 		boolean result = false;
@@ -182,7 +158,8 @@ public class MediaFileDao {
 	}
 
 	public static MediaFile getMediaFileByFilePath(String filePath) {
-		String sql = "SELECT * FROM MediaFile WHERE filePath='" + filePath.replace("\\", "\\\\") + "'";
+		String filePath4SQL =  "'" + filePath.replace("\\", "\\\\") + "'";
+		String sql = "SELECT * FROM MediaFile WHERE filePath= "+filePath4SQL;
 		MediaFile result = null;
 		try {
 			conn = DbUtil.getConn();
@@ -234,24 +211,26 @@ public class MediaFileDao {
 	public static void addTagToMediaFile(Tag tag, MediaFile mediaFile) {
 		String sql = "INSERT INTO MediaFile_Tag(mediafile_id, tag_id) VALUES(" + mediaFile.getId() + ", " + tag.getId()
 				+ ")";
-		if(!mediaFileTagAlreadyAdded(mediaFile, tag)) {
-		try {
-			conn = DbUtil.getConn();
-			Statement stmt = conn.createStatement();
-			stmt.executeUpdate(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
+		if (!mediaFileTagAlreadyAdded(mediaFile, tag)) {
 			try {
-				conn.close();
+				conn = DbUtil.getConn();
+				Statement stmt = conn.createStatement();
+				stmt.executeUpdate(sql);
 			} catch (SQLException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}
-		}}
+		}
 	}
-	
+
 	public static void deleteTagFromMediaFile(Tag tag, MediaFile mediaFile) {
-		String sql = "DELETE FROM MediaFile_Tag WHERE MediaFile_id = "+ mediaFile.getId() + " AND Tag_id = " + tag.getId();
+		String sql = "DELETE FROM MediaFile_Tag WHERE MediaFile_id = " + mediaFile.getId() + " AND Tag_id = "
+				+ tag.getId();
 		try {
 			conn = DbUtil.getConn();
 			Statement stmt = conn.createStatement();
@@ -293,6 +272,38 @@ public class MediaFileDao {
 
 		return result;
 
+	}
+
+	public static List<MediaFile> getAllMediaFilesTaggedHavingAllTags(Tag[] tags) {
+		String sqlTagsIds = "";
+		for (int i=0; i<tags.length-1; i++ ) {
+			sqlTagsIds += tags[i].getId()+", ";
+		}
+		sqlTagsIds += tags[tags.length-1].getId();
+		
+		String sql = "SELECT mediafile.* FROM mediafile JOIN MediaFile_Tag ON MediaFile.id=MediaFile_Tag.mediafile_id JOIN Tag ON MediaFile_Tag.tag_id=Tag.id"
+				+ " WHERE Tag.id in ("+sqlTagsIds+") GROUP BY filePath HAVING COUNT(Tag.id) = "+ tags.length;
+		List<MediaFile> result = new ArrayList<MediaFile>();
+		try {
+			conn = DbUtil.getConn();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				result.add(createMediaFileObject(rs));
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		return result;
 	}
 
 }

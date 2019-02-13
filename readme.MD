@@ -34,14 +34,14 @@ At the moment application has UI with main menu that opens one of 3 selected mai
 Althou some video files are not supported by in-app media player user can still play em in external players.
 On the right side of media player is a playlist that consists of  file paths to added videos files.
 Videos can be added at the moment via right mouse button context menu, or by dragging file directly from windows explorer to the playlist area.
-Option to play single video file in external players is also stored in right-mouse-button context menu.
+Option to play single video file in external players is also stored under right-mouse-button context menu.
 Below the playlist are buttons that can open whole playlist in external media player.
 Above the playlist is expandable panel called Filter Tags.
-Currently it allows tags to be dropped inside Filter Tags expanded area.
-In future it will load all video files from database that have assigned every tag from Filter Tags panel area. This feature is yet to be implemented.
+It allows tags to be dropped inside Filter Tags expanded area. To remove tags from this panel drag and drop them on trash icon.
+When Filer Tags panel is closed playlist items are replaced with all video files from database that have assigned every tag from Filter Tags panel area.
 Below the in-app media player frame are located controls for media player as well as Tags Picker button.
 Tags Picker button opens new panel that displays all tags. Theres also a button to add a new tag.
-At the moment Tags from Tags Picker can be dragged into expanded panel of Filter Tags and panel of Selected File Tags.
+Tags from Tags Picker can be dragged into expanded panel of Filter Tags and panel of Selected File Tags.
 Panel of Selected File Tags allow to assign tags to currently selected media file. To remove tags from file just drag them to trash can icon.
 ### Database - window added for data management.
 Currently its empty. It was added for future purposes.
@@ -60,8 +60,6 @@ When application is beeing launched for the first time:
 
 # To Do List:
 - Set options that make external mediaplayers paths be set dynamically,
-- Give ability to delete Tags from Tags Filter panel via drag over trash can icon.
-- Make TagsFilter loading videos from database that have tags from tags filter
 - Add ability to assign pictures to tags.
 - Create thumbnails from mediaplayer screen shots,
 - Add small Thumbnail formatting from file on Hard Drive and mediaplayer screenshot.
@@ -78,8 +76,8 @@ When application is beeing launched for the first time:
 
 
 # Disclaimer:
-Application is still under development. Many features are yet not implemented. Some bugs may occure.
-It is 1st JavaFX application I've ever made. Also its far from beeing complete.
+Application is still under development. Many features are yet not implemented.
+It is 1st JavaFX application I've ever made.
 
 
 

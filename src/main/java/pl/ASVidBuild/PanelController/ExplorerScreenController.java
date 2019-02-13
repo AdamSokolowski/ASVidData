@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -18,7 +20,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -40,6 +44,7 @@ import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import pl.ASVidBuild.SettingsData;
 import pl.ASVidBuild.PanelController.MainScreenController;
@@ -140,18 +145,13 @@ public class ExplorerScreenController {
 
 	private String selectedFilePath = "";
 
-	private List<Integer> fileTagsListPanelId = new LinkedList<Integer>();
-
-	private List<Integer> filterTagsVidPlayListId = new LinkedList<Integer>();
+	private boolean tagWindowButtonOpened = false;
+	
+	private Stage tagsStage;
 
 	private SettingsData settingsData;
 
 	private MainScreenController mainScreenController;
-
-	private static final int TAG_WIDTH = 100;
-	private static final int TAG_HEIGHT = 75;
-	private static final int GAP_BTWEEN_TAGS = 3;
-	private static final int TAGS_MAX_ROWS_COUNT = 1;
 
 	public void setMainScreenController(MainScreenController mainScreenController) {
 		this.mainScreenController = mainScreenController;
@@ -227,8 +227,33 @@ public class ExplorerScreenController {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 				tagsFilterFrameExpandedResize(newValue);
+				if (newValue == false && filterTagsPanel.wereTagsModified()) {
+					Alert executeTagFilterAlert = UIHelper.executeTagFilterAlert();
+					Optional<ButtonType> buttonPressed = executeTagFilterAlert.showAndWait();
+					if (buttonPressed.isPresent() && buttonPressed.get() == ButtonType.OK) {
+						executeFilterTagsQuery();
+						filterTagsPanel.setTagsUnmodified();
+					}
+				}
 			}
+
 		});
+
+	}
+
+	private void executeFilterTagsQuery() {
+		Tag[] tags = filterTagsPanel.getTags();
+		List<MediaFile> queryMediaFiles;
+		if (tags == null) {
+			queryMediaFiles = MediaFileDao.getAllMediaFiles();
+		} else {
+			queryMediaFiles = MediaFileDao.getAllMediaFilesTaggedHavingAllTags(tags);
+		}
+		vidPlayList.getItems().clear();
+		for (int i = 0; i < queryMediaFiles.size(); i++) {
+
+			vidPlayList.getItems().add(queryMediaFiles.get(i).getFilePath());
+		}
 
 	}
 
@@ -509,20 +534,37 @@ public class ExplorerScreenController {
 
 	@FXML
 	void TagWindowButtonClick(ActionEvent event) {
-		Scene scene = null;
-		FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/fxml/TagScreen.fxml"));
-		SplitPane splitPane = null;
-		try {
-			splitPane = loader.load();
 
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (tagWindowButtonOpened) {
+			tagsStage.toFront();
+		} else
+
+		{
+			FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/fxml/TagScreen.fxml"));
+			SplitPane splitPane = null;
+			try {
+				splitPane = loader.load();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			Scene sceneTags = new Scene(splitPane);
+			tagsStage = new Stage();
+			tagsStage.setScene(sceneTags);
+			tagsStage.setTitle("Tags Palette");
+			tagsStage.show();
+			tagWindowButtonOpened = true;
+			tagsStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+				@Override
+				public void handle(WindowEvent event) {
+
+					tagWindowButtonOpened = false;
+				}
+
+			});
 		}
-		scene = new Scene(splitPane);
-		Stage tagsStage = new Stage();
-		tagsStage.setScene(scene);
-		tagsStage.setTitle("Tags Palette");
-		tagsStage.show();
+
 	}
 
 	@FXML
@@ -538,43 +580,6 @@ public class ExplorerScreenController {
 
 		for (int i = 0; i < files.size(); i++) {
 			addFileToVidPlayListAndDatabase(files.get(i));
-		}
-	}
-
-	@FXML
-	void filterTagsVidPlayListDragDropped(DragEvent event) {
-
-		Integer tagId = TagClipboard.getDraggedTagId();
-		if (!filterTagsVidPlayListId.contains(tagId)) {
-
-			filterTagsVidPlayListId.add(tagId);
-		}
-	}
-
-	@FXML
-	void filterTagsVidPlayListDragOver(DragEvent event) {
-		if (TagClipboard.isDraggedSourceATag()) {
-			event.acceptTransferModes(TransferMode.ANY);
-		}
-	}
-
-	@FXML
-	void fileTagsListPanelDragDropped(DragEvent event) {
-
-		Integer tagId = TagClipboard.getDraggedTagId();
-		if (!fileTagsListPanelId.contains(tagId)) {
-			fileTagsListPanelId.add(tagId);
-			Tag tag = TagDao.getTagById(tagId);
-			MediaFile mediaFile = MediaFileDao
-					.getMediaFileByFilePath(vidPlayList.getSelectionModel().getSelectedItem().toString());
-			MediaFileDao.addTagToMediaFile(tag, mediaFile);
-		}
-	}
-
-	@FXML
-	void fileTagsListPanelDragOver(DragEvent event) {
-		if (TagClipboard.isDraggedSourceATag()) {
-			event.acceptTransferModes(TransferMode.ANY);
 		}
 	}
 

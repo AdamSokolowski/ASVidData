@@ -37,6 +37,7 @@ public class TagsPane extends Pane {
 	private int tagWidth = 100;
 	private int tagHeight = 75;
 	private int tagsMaxColCount = 0;
+	private boolean tagsModified = false;
 	private Button placeHolderButton;
 
 	public enum ButtonPlaceHolderType {
@@ -87,7 +88,7 @@ public class TagsPane extends Pane {
 			placeHolderButtonSizeRefresh();
 		}
 	}
-
+	
 	private void addNewTagButtonClick() {
 		Optional<String> newTagName = null;
 		TextInputDialog tagInputDialog = UIHelper.newTagInputDialog();
@@ -150,6 +151,14 @@ public class TagsPane extends Pane {
 		this.tagsMaxColCount = tagsMaxColCount;
 	}
 
+	public boolean wereTagsModified() {
+		return tagsModified;
+	}
+
+	public void setTagsUnmodified() {
+		this.tagsModified = false;
+	}
+
 	public void initPlaceHolderButtonPosition() {
 		if (buttonPlaceHolderType != ButtonPlaceHolderType.NONE) {
 			Point panelCoordinatesOfButton = measureTagLayoutPosition(0, 1);
@@ -198,6 +207,7 @@ public class TagsPane extends Pane {
 		Point panelCoordinatesOfTag = measureTagLayoutPosition(paneChildrenListId, tagsMaxColCountValue);
 		TagNode tagNode = new TagNode(tag, this);
 		tagItems.add(tagNode);
+		tagsModified = true;
 		this.getChildren().add(tagNode.getNode());
 		if (tagNode.getTagPicturePath().equals("")) {
 			Button node = (Button) tagNode.getNode();
@@ -244,6 +254,7 @@ public class TagsPane extends Pane {
 
 	public void clearTagItemsList() {
 		tagItems.clear();
+		tagsModified = true;
 		this.getChildren().clear();
 		this.setPrefWidth(this.getMinWidth());
 		this.setPrefHeight(this.getMinHeight());
@@ -259,7 +270,8 @@ public class TagsPane extends Pane {
 		int tagsMaxColCountValue = tagsMaxColCount;
 		this.getChildren().remove(this.tagItems.get(tagItemsIndex).getNode());
 		this.tagItems.remove(tagItemsIndex);
-
+		tagsModified = true;
+		
 		if (tagsMaxColCountValue < 1) {
 			tagsMaxColCountValue = tagItems.size();
 		}
@@ -281,4 +293,14 @@ public class TagsPane extends Pane {
 		}
 	}
 
+	public Tag[] getTags(){
+		if(this.tagItems.size()==0) {
+			return null;
+		}
+		Tag[] result = new Tag[this.tagItems.size()];
+		for(int i=0; i<result.length; i++) {
+			result[i] = this.tagItems.get(i).getTag();
+		}
+		return result;
+	}
 }
