@@ -60,11 +60,7 @@ public class TagDao {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				DbUtil.releaseConnection();
 			}
 		}
 		tag.setId(getTagByTagName(tagName).getId());	//update tags id by one created in database
@@ -96,12 +92,7 @@ public class TagDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
+			DbUtil.releaseConnection();
 		}
 		return result;
 
@@ -122,12 +113,7 @@ public class TagDao {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-
+				DbUtil.releaseConnection();
 			}
 			return result;
 
@@ -147,12 +133,7 @@ public class TagDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
+			DbUtil.releaseConnection();
 		}
 		return result;
 
@@ -175,12 +156,7 @@ public class TagDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
+			DbUtil.releaseConnection();
 		}		
 		
 		

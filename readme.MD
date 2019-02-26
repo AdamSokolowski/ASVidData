@@ -44,7 +44,7 @@ Tags Picker button opens new panel that displays all tags. Theres also a button 
 Tags from Tags Picker can be dragged into expanded panel of Filter Tags and panel of Selected File Tags.
 Panel of Selected File Tags allow to assign tags to currently selected media file. To remove tags from file just drag them to trash can icon.
 ### Database - window added for data management.
-Currently its empty. It was added for future purposes.
+Theres an option to save database to a file and restore the database data from saved file.
 ### Options - window for changing application settings.
 So far, here you can setup paths to executable files of Windows Media Player and Media Player Classic, depending on where those were installed.
 In future there will be option to set in-app media player behavior. 2 options have already been placed there, those options are not yet implemented.
@@ -59,7 +59,6 @@ When application is beeing launched for the first time:
 - List of tags added to each video file.
 
 # To Do List:
-- Set options that make external mediaplayers paths be set dynamically,
 - Add ability to assign pictures to tags.
 - Create thumbnails from mediaplayer screen shots,
 - Add small Thumbnail formatting from file on Hard Drive and mediaplayer screenshot.
@@ -70,7 +69,6 @@ When application is beeing launched for the first time:
 - Database table for more than 1 picture for media files.
 - Add ability to rearrange Tags in Tags window via drag and drop.
 - Add ability to reset application setup and data eg. database drop-and-create
-- Add option to backup database data into a file.
 - Add FullScreen for MediaPlayer.
 - Fix video progressbar responsiveness.
 

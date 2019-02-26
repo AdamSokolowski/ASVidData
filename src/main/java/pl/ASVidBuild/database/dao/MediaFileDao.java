@@ -38,33 +38,33 @@ public class MediaFileDao {
 		return mf;
 	}
 
-	
 	public static void addMediaFileToDb(MediaFile mediaFile, boolean autoUpdateWhenMediaFileExistsInDb) {
 		String filePath = mediaFile.getFilePath();
 		String picturePath = mediaFile.getPicturePath();
 		byte fileRating = mediaFile.getFileRating();
 		try {
 			conn = DbUtil.getConn();
-		
-		if (mediaFileExistsInDb(filePath)) {
-			if (autoUpdateWhenMediaFileExistsInDb) {
-				DbRepository.mySQLUpdateRecord("MediaFile", "picturePath, fileRating", "'" + picturePath.replace("\\", "\\\\") + "', " + fileRating,
-						"filePath='" + filePath.replace("\\", "\\\\") + "'", conn);
+			if (mediaFileExistsInDb(filePath)) {
+				
+				if (autoUpdateWhenMediaFileExistsInDb) {
+					DbRepository.mySQLUpdateRecord("MediaFile", "picturePath, fileRating",
+							picturePath + ", " + fileRating,
+							"filePath='" + filePath.replace("\\", "\\\\") + "'", conn);
+				}
+			} else {
+				DbRepository.mySQLAddRecord("MediaFile", "filePath, picturePath, fileRating",
+						filePath + ", " + picturePath + ", "
+								+ fileRating,
+						conn);
 			}
-		} else {
-			DbRepository.mySQLAddRecord("MediaFile", "picturePath, fileRating", "'" + picturePath.replace("\\", "\\\\") + "', " + fileRating, conn);
-		}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				DbUtil.releaseConnection();
 			}
 		}
+
 	}
 
 	public static void addMediaFilesToDb(String[] filePathList) {
@@ -73,7 +73,7 @@ public class MediaFileDao {
 			for (int i = 0; i < filePathList.length; i++) {
 				if (!mediaFileExistsInDb(filePathList[i])) {
 					conn = DbUtil.getConn();
-					DbRepository.mySQLAddRecord("MediaFile", "filePath",filePathList[i], conn);
+					DbRepository.mySQLAddRecord("MediaFile", "filePath", filePathList[i], conn);
 
 				}
 
@@ -82,11 +82,7 @@ public class MediaFileDao {
 			e.printStackTrace();
 		} finally {
 			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				DbUtil.releaseConnection();
 			}
 		}
 	}
@@ -117,12 +113,7 @@ public class MediaFileDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
+			DbUtil.releaseConnection();
 		}
 		return result;
 
@@ -148,18 +139,14 @@ public class MediaFileDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DbUtil.releaseConnection();
 		}
 		return result;
 	}
 
 	public static MediaFile getMediaFileByFilePath(String filePath) {
-		String filePath4SQL =  "'" + filePath.replace("\\", "\\\\") + "'";
-		String sql = "SELECT * FROM MediaFile WHERE filePath= "+filePath4SQL;
+		String filePath4SQL = "'" + filePath.replace("\\", "\\\\") + "'";
+		String sql = "SELECT * FROM MediaFile WHERE filePath= " + filePath4SQL;
 		MediaFile result = null;
 		try {
 			conn = DbUtil.getConn();
@@ -172,12 +159,7 @@ public class MediaFileDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
+			DbUtil.releaseConnection();
 		}
 		return result;
 
@@ -197,20 +179,15 @@ public class MediaFileDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
+			DbUtil.releaseConnection();
 		}
 		return result;
 
 	}
 
 	public static void addTagToMediaFile(Tag tag, MediaFile mediaFile) {
-		String sql = "INSERT INTO MediaFile_Tag(mediafile_id, tag_id) VALUES(" + mediaFile.getId() + ", " + tag.getId()
-				+ ")";
+		String sql = "INSERT INTO MediaFile_Tag(mediafile_id, tag_id) VALUES(" + mediaFile.getId() + ", " + tag.getId() + ")";
+		System.out.println(sql);
 		if (!mediaFileTagAlreadyAdded(mediaFile, tag)) {
 			try {
 				conn = DbUtil.getConn();
@@ -219,11 +196,7 @@ public class MediaFileDao {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				DbUtil.releaseConnection();
 			}
 		}
 	}
@@ -238,11 +211,7 @@ public class MediaFileDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DbUtil.releaseConnection();
 		}
 	}
 
@@ -262,11 +231,7 @@ public class MediaFileDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DbUtil.releaseConnection();
 
 		}
 
@@ -276,13 +241,13 @@ public class MediaFileDao {
 
 	public static List<MediaFile> getAllMediaFilesTaggedHavingAllTags(Tag[] tags) {
 		String sqlTagsIds = "";
-		for (int i=0; i<tags.length-1; i++ ) {
-			sqlTagsIds += tags[i].getId()+", ";
+		for (int i = 0; i < tags.length - 1; i++) {
+			sqlTagsIds += tags[i].getId() + ", ";
 		}
-		sqlTagsIds += tags[tags.length-1].getId();
-		
+		sqlTagsIds += tags[tags.length - 1].getId();
+
 		String sql = "SELECT mediafile.* FROM mediafile JOIN MediaFile_Tag ON MediaFile.id=MediaFile_Tag.mediafile_id JOIN Tag ON MediaFile_Tag.tag_id=Tag.id"
-				+ " WHERE Tag.id in ("+sqlTagsIds+") GROUP BY filePath HAVING COUNT(Tag.id) = "+ tags.length;
+				+ " WHERE Tag.id in (" + sqlTagsIds + ") GROUP BY filePath HAVING COUNT(Tag.id) = " + tags.length;
 		List<MediaFile> result = new ArrayList<MediaFile>();
 		try {
 			conn = DbUtil.getConn();
@@ -295,12 +260,7 @@ public class MediaFileDao {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
+			DbUtil.releaseConnection();
 		}
 
 		return result;

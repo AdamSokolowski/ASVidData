@@ -24,6 +24,7 @@ public class Main extends Application {
 		if (!file.exists()) {
 			firstSuccessfullRun();
 		}
+		
 		launch(args);
 	}
 

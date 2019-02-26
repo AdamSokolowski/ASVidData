@@ -39,6 +39,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
@@ -146,6 +147,8 @@ public class ExplorerScreenController {
 	private String selectedFilePath = "";
 
 	private boolean tagWindowButtonOpened = false;
+	
+	private MediaPlayer.Status playerStatus = Status.UNKNOWN;
 	
 	private Stage tagsStage;
 
@@ -381,6 +384,7 @@ public class ExplorerScreenController {
 		}
 	}
 
+	
 	private void playSelectedVidPlayListItem() {
 		try {
 			Path path = Paths.get(vidPlayList.getSelectionModel().getSelectedItem().toString());
@@ -389,14 +393,13 @@ public class ExplorerScreenController {
 			if (selectedFilePath.compareTo(filePath) != 0) {
 				if (mediaPlayer != null) {
 					mediaPlayer.stop();
-					System.out.println("Media file could not be opened.");
 				}
 				selectedFilePath = filePath;
 				System.out.println("Opened file in MediaPlayer - " + filePath);
 				Media media = new Media(filePath);
 				mediaPlayer = new MediaPlayer(media);
 				mainMediaView.setMediaPlayer(mediaPlayer);
-
+				
 				mediaPlayer.play();
 				mediaPlayer.setVolume(mainMediaViewVolume.getValue() / 100);
 				if (mainMediaViewMute.textProperty().isEqualTo("Unmute").getValue()) {
@@ -420,6 +423,7 @@ public class ExplorerScreenController {
 					}
 				});
 
+
 				mediaPlayer.setOnEndOfMedia(new Runnable() {
 
 					@Override
@@ -435,6 +439,7 @@ public class ExplorerScreenController {
 					@Override
 					public void changed(ObservableValue<? extends Status> observable, Status oldValue,
 							Status newValue) {
+						playerStatus = newValue;
 						System.out.println(newValue.toString());
 					}
 

@@ -20,7 +20,7 @@ public class DbRepository {
 					DbUtil.DB_USER, DbUtil.DB_PASS);
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("CREATE DATABASE " + DbUtil.DB_NAME);
-			conn.close();
+			DbUtil.releaseConnection();
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -28,7 +28,26 @@ public class DbRepository {
 		return false;
 	}
 
-	public static void initDatabaseTables() {
+	public static boolean dropAllTables() {
+		boolean executed = false;
+		try {
+			conn = DbUtil.getConn();
+			deleteDBTable("MediaFile_Tag", conn);
+			deleteDBTable("Tag", conn);
+			deleteDBTable("MediaFile", conn);
+
+			DbUtil.releaseConnection();
+			executed = true;
+		} catch (SQLException e) {
+			System.out.println("Failed to connect with database.");
+			e.printStackTrace();
+		}
+		return executed;
+
+	}
+
+	public static boolean initDatabaseTables() {
+		boolean executed = false;
 		try {
 
 			conn = DbUtil.getConn();
@@ -68,17 +87,15 @@ public class DbRepository {
 				statement.execute(sqlTabCreateMediaFile_Tag);
 				System.out.println(sqlTabCreateMediaFile_Tag);
 			}
+			executed = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				DbUtil.releaseConnection();
 			}
 		}
+		return executed;
 	}
 
 	public static boolean tableExists(String tableName, Connection databaseConnection) throws SQLException {
@@ -88,6 +105,18 @@ public class DbRepository {
 			return true;
 		}
 		return false;
+	}
+
+	public static void deleteDBTable(String tableName, Connection conn) throws SQLException {
+		if (tableExists(tableName, conn)) {
+			String sql = mySQLDeleteTable(tableName);
+			Statement statement = conn.createStatement();
+			statement.execute(sql);
+		}
+	}
+
+	public static String mySQLDeleteTable(String tableName) {
+		return "DROP TABLE " + tableName;
 	}
 
 	public static String mySQLQueryGeneratorCreateTable(String tableName, String tabFields, String relation) {
@@ -107,13 +136,14 @@ public class DbRepository {
 		PreparedStatement stmt = databaseConnection.prepareStatement(sql);
 		for (int i = 0; i < tabValuesArray.length; i++) {
 			stmt.setString(i + 1, tabValuesArray[i]);
+			System.out.println(" Value " + i + ": " + tabValuesArray[i]);
 		}
 		stmt.executeUpdate();
 	}
 
 	public static void mySQLUpdateRecord(String tableName, String tabFields, String tabValues,
 			String conditionArguments, Connection databaseConnection) throws SQLException {
-		if (conditionArguments.indexOf(";") == -1) {		//checking if condition might have SQL Injection
+		if (conditionArguments.indexOf(";") == -1) { // checking if condition might have SQL Injection
 			String[] tabFieldsArray = tabFields.split(", ");
 			String[] tabValuesArray = tabValues.split(", ");
 			String sql = "UPDATE " + tableName + " SET ";
@@ -138,6 +168,7 @@ public class DbRepository {
 		int i = 0;
 		while (i < tabValues.length - 1) {
 			valuesQuestionMarks += "?,";
+			i++;
 		}
 		valuesQuestionMarks += "?";
 		return valuesQuestionMarks;
