@@ -64,7 +64,7 @@
          <bottom>
             <VBox prefHeight="200.0" prefWidth="681.0" BorderPane.alignment="CENTER">
                <children>
-                  <Slider fx:id="mainMediaViewPlayProgress" blockIncrement="1.0" onKeyReleased="#mainMediaViewPlayProgressKeyClick" onMouseClicked="#mainMediaViewPlayProgressClick">
+                  <Slider fx:id="mainMediaViewPlayProgress" blockIncrement="1.0" minorTickCount="1" onKeyReleased="#mainMediaViewPlayProgressKeyClick" onMouseClicked="#mainMediaViewPlayProgressClick">
                      <padding>
                         <Insets left="5.0" />
                      </padding>

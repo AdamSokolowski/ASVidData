@@ -375,15 +375,19 @@ public class ExplorerScreenController {
 		if (event.getButton().equals(MouseButton.PRIMARY)
 				&& vidPlayList.getSelectionModel().getSelectedItem().isEmpty() == false) {
 
-			fileTagsListPanel.clearTagItemsList();
-
-			String filePath = vidPlayList.getSelectionModel().getSelectedItem().toString();
-			fileTagsListPanel.loadFileTags(filePath);
+			reloadSelectedVidFileTags();
 
 			playSelectedVidPlayListItem();
 		}
 	}
 
+
+	private void reloadSelectedVidFileTags() {
+		fileTagsListPanel.clearTagItemsList();
+
+		String filePath = vidPlayList.getSelectionModel().getSelectedItem().toString();
+		fileTagsListPanel.loadFileTags(filePath);
+	}
 	
 	private void playSelectedVidPlayListItem() {
 		try {
@@ -419,7 +423,9 @@ public class ExplorerScreenController {
 					@Override
 					public void changed(ObservableValue<? extends Duration> observable, Duration oldValue,
 							Duration newValue) {
-						mainMediaViewPlayProgress.setValue(newValue.toSeconds());
+						if(mainMediaViewPlayProgress.getValue() < newValue.toSeconds()) {
+							mainMediaViewPlayProgress.setValue(newValue.toSeconds());
+						}
 					}
 				});
 
@@ -477,6 +483,7 @@ public class ExplorerScreenController {
 			} else {
 				vidPlayList.getSelectionModel().clearAndSelect(vidPlayList.getItems().size() - 1);
 			}
+			reloadSelectedVidFileTags();
 			playSelectedVidPlayListItem();
 		}
 	}
@@ -490,6 +497,7 @@ public class ExplorerScreenController {
 			} else {
 				vidPlayList.getSelectionModel().clearAndSelect(0);
 			}
+			reloadSelectedVidFileTags();
 			playSelectedVidPlayListItem();
 		}
 	}
@@ -523,18 +531,25 @@ public class ExplorerScreenController {
 
 	@FXML
 	void mainMediaViewPlayProgressClick(MouseEvent event) {
+		Slider progressBar = (Slider)event.getSource();
+		double value;
+		value = (event.getX()-9) * (progressBar.getMax() / (progressBar.getWidth()-19));
+		
+		progressBar.setValue(value); 
+		
 		mediaPlayerSeekToProgressSlider();
 	}
 
 	@FXML
 	void mainMediaViewPlayProgressKeyClick(KeyEvent event) {
+		mediaPlayer.pause();
 		mediaPlayerSeekToProgressSlider();
 	}
 
 	private void mediaPlayerSeekToProgressSlider() {
-		mediaPlayer.pause();
+
 		mediaPlayer.seek(Duration.seconds(mainMediaViewPlayProgress.getValue()));
-		mediaPlayer.play();
+
 	}
 
 	@FXML
@@ -599,9 +614,7 @@ public class ExplorerScreenController {
 
 			MediaFileDao.deleteTagFromMediaFile(tag, selectedMediaFile);
 
-			fileTagsListPanel.clearTagItemsList();
-			String filePath = vidPlayList.getSelectionModel().getSelectedItem().toString();
-			fileTagsListPanel.loadFileTags(filePath);
+			reloadSelectedVidFileTags();
 
 			System.out.println("Tag " + tag.getTagName() + " is no longer assigned to media file: "
 					+ vidPlayList.getSelectionModel().getSelectedItem().toString());

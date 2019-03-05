@@ -127,9 +127,9 @@ public class DbRepository {
 		return "INSERT INTO " + tableName + "(" + tabFields + ") VALUES(" + tabValues + ")";
 	}
 
-	public static void mySQLAddRecord(String tableName, String tabFields, String tabValues,
+	public static void mySQLAddRecord(String tableName, String tabFields, String[] tabValues,
 			Connection databaseConnection) throws SQLException {
-		String[] tabValuesArray = tabValues.split(", ");
+		String[] tabValuesArray = tabValues;
 		String sql = "INSERT INTO " + tableName + "(" + tabFields + ") VALUES(" + valuesQuestionMarks(tabValuesArray)
 				+ ")";
 		System.out.println(sql);
@@ -141,11 +141,11 @@ public class DbRepository {
 		stmt.executeUpdate();
 	}
 
-	public static void mySQLUpdateRecord(String tableName, String tabFields, String tabValues,
+	public static void mySQLUpdateRecord(String tableName, String tabFields, String[] tabValues,
 			String conditionArguments, Connection databaseConnection) throws SQLException {
 		if (conditionArguments.indexOf(";") == -1) { // checking if condition might have SQL Injection
 			String[] tabFieldsArray = tabFields.split(", ");
-			String[] tabValuesArray = tabValues.split(", ");
+			String[] tabValuesArray = tabValues;
 			String sql = "UPDATE " + tableName + " SET ";
 			for (int i = 0; i < tabFieldsArray.length - 1; i++) {
 				sql += tabFieldsArray[i] + "=?, ";
@@ -174,10 +174,10 @@ public class DbRepository {
 		return valuesQuestionMarks;
 	}
 
-	public static String mySQLQueryGeneratorUpdateRecordValues(String tableName, String tabFields, String tabValues,
+	public static String mySQLQueryGeneratorUpdateRecordValues(String tableName, String tabFields, String[] tabValues,
 			String conditionArguments) {
 		String[] tabFieldsArray = tabFields.split(", ");
-		String[] tabValuesArray = tabValues.split(", ");
+		String[] tabValuesArray = tabValues;
 		String sql = "UPDATE " + tableName + " SET ";
 		for (int i = 0; i < tabFieldsArray.length - 1; i++) {
 			sql += tabFieldsArray[i] + "=" + tabValuesArray[i] + ", ";

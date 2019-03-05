@@ -1,6 +1,7 @@
 package pl.ASVidBuild.database.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -47,14 +48,15 @@ public class MediaFileDao {
 			if (mediaFileExistsInDb(filePath)) {
 				
 				if (autoUpdateWhenMediaFileExistsInDb) {
+					String[] tabValues= { picturePath, String.valueOf(fileRating) };
 					DbRepository.mySQLUpdateRecord("MediaFile", "picturePath, fileRating",
-							picturePath + ", " + fileRating,
+							tabValues,
 							"filePath='" + filePath.replace("\\", "\\\\") + "'", conn);
 				}
 			} else {
+				String[] tabValues= { filePath, picturePath, String.valueOf(fileRating) };
 				DbRepository.mySQLAddRecord("MediaFile", "filePath, picturePath, fileRating",
-						filePath + ", " + picturePath + ", "
-								+ fileRating,
+						tabValues,
 						conn);
 			}
 		} catch (SQLException e) {
@@ -68,12 +70,13 @@ public class MediaFileDao {
 	}
 
 	public static void addMediaFilesToDb(String[] filePathList) {
-
+		String[] tabValue = new String[1];
 		try {
 			for (int i = 0; i < filePathList.length; i++) {
 				if (!mediaFileExistsInDb(filePathList[i])) {
 					conn = DbUtil.getConn();
-					DbRepository.mySQLAddRecord("MediaFile", "filePath", filePathList[i], conn);
+					tabValue[0] = filePathList[i];
+					DbRepository.mySQLAddRecord("MediaFile", "filePath", tabValue, conn);
 
 				}
 
@@ -145,13 +148,15 @@ public class MediaFileDao {
 	}
 
 	public static MediaFile getMediaFileByFilePath(String filePath) {
-		String filePath4SQL = "'" + filePath.replace("\\", "\\\\") + "'";
-		String sql = "SELECT * FROM MediaFile WHERE filePath= " + filePath4SQL;
+		//String filePath4SQL = "'" + filePath.replace("\\", "\\\\").replace("'", "\'") + "'";
+		String sql = "SELECT * FROM MediaFile WHERE filePath= ?";
 		MediaFile result = null;
 		try {
 			conn = DbUtil.getConn();
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setString(1, filePath);
+			//Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
 				result = createMediaFileObject(rs);
 			}

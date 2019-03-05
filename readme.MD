@@ -69,6 +69,7 @@ When application is beeing launched for the first time:
 - Database table for more than 1 picture for media files.
 - Add ability to rearrange Tags in Tags window via drag and drop.
 - Add ability to reset application setup and data eg. database drop-and-create
+- Add warning to database restore option that current database data will be lost and replaced.
 - Add FullScreen for MediaPlayer.
 - Fix video progressbar responsiveness.
 
